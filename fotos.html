@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visor de Galería Minimalista</title>
+    <style>
+        /* Reseteo y fondo minimalista oscuro */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: #0a0a0a;
+            overflow: hidden; /* Evita scroll no deseado */
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        /* Contenedor principal de la imagen */
+        .visor-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #foto-actual {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; /* Mantiene la proporción de la foto */
+            transition: opacity 0.3s ease; /* Transición suave al cambiar de foto */
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        /* Botón de descarga minimalista flotante */
+        .btn-descarga {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            z-index: 10;
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #ffffff;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .btn-descarga:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .btn-descarga svg {
+            width: 24px;
+            height: 24px;
+        }
+    </style>
+</head>
+<body>
+
+    <a id="btn-descarga" href="#" download class="btn-descarga" title="Descargar foto">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+    </a>
+
+    <div class="visor-container" id="visor">
+        <img id="foto-actual" src="" alt="Vista de fotografía">
+    </div>
+
+    <script>
+        // 1. Configuración de imágenes (del 01 al 19)
+        const totalFotos = 19;
+        const fotos = [];
+        for (let i = 1; i <= totalFotos; i++) {
+            // padStart asegura que el formato sea 01, 02, etc.
+            fotos.push(String(i).padStart(2, '0') + '.jpg');
+        }
+
+        let indiceActual = 0;
+        const imgElement = document.getElementById('foto-actual');
+        const btnDescarga = document.getElementById('btn-descarga');
+
+        // 2. Función para cargar y actualizar la vista
+        function actualizarVisor() {
+            const nombreArchivo = fotos[indiceActual];
+            
+            // Efecto de desvanecimiento
+            imgElement.style.opacity = 0;
+            
+            setTimeout(() => {
+                imgElement.src = nombreArchivo;
+                btnDescarga.href = nombreArchivo;
+                btnDescarga.setAttribute('download', nombreArchivo);
+                imgElement.style.opacity = 1;
+            }, 150); // Sincronizado con la transición CSS
+        }
+
+        // 3. Lógica para detectar el deslizamiento (Swipe) en pantallas táctiles
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const umbralSwipe = 50; // Distancia mínima en píxeles para considerar un swipe
+
+        function procesarSwipe() {
+            const distancia = touchEndX - touchStartX;
+            
+            if (distancia > umbralSwipe) {
+                // Swipe hacia la derecha (Anterior)
+                indiceActual = (indiceActual > 0) ? indiceActual - 1 : totalFotos - 1;
+                actualizarVisor();
+            } else if (distancia < -umbralSwipe) {
+                // Swipe hacia la izquierda (Siguiente)
+                indiceActual = (indiceActual < totalFotos - 1) ? indiceActual + 1 : 0;
+                actualizarVisor();
+            }
+        }
+
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            procesarSwipe();
+        });
+
+        // 4. Extra: Soporte para flechas del teclado en PC
+        document.addEventListener('keydown', (e) => {
+            if(e.key === 'ArrowLeft') {
+                indiceActual = (indiceActual > 0) ? indiceActual - 1 : totalFotos - 1;
+                actualizarVisor();
+            } else if(e.key === 'ArrowRight') {
+                indiceActual = (indiceActual < totalFotos - 1) ? indiceActual + 1 : 0;
+                actualizarVisor();
+            }
+        });
+
+        // Carga inicial de la primera foto
+        actualizarVisor();
+    </script>
+</body>
+</html>
