@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carta</title>
+    <title>Diario - Modo Oscuro</title>
 
     <link href="assets/css/dflip.min.css" rel="stylesheet" type="text/css">
     <link href="assets/css/themify-icons.min.css" rel="stylesheet" type="text/css">
@@ -14,7 +14,8 @@
             padding: 0;
             height: 100%;
             width: 100%;
-            background-color: #2b2b2b;
+            /* Gris mucho más oscuro para el fondo general */
+            background-color: #121212; 
             overflow: hidden; 
         }
         
@@ -23,17 +24,58 @@
             width: 100vw;
             position: relative;
         }
+
+        /* =========================================
+           MODO OSCURO PARA EL MENÚ/CONTROLES DE DFLIP
+           ========================================= */
+        
+        /* Fondo de la barra de controles inferior */
+        .df-ui-wrapper .df-ui-controls {
+            background-color: #1e1e1e !important;
+            border-radius: 8px !important; /* Mantiene los bordes redondeados que se ven en móvil */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6) !important;
+            border: 1px solid #333 !important;
+        }
+
+        /* Color de los iconos/botones */
+        .df-ui-wrapper .df-ui-btn {
+            color: #b3b3b3 !important; 
+            background-color: transparent !important;
+        }
+
+        /* Efecto al pasar el dedo/ratón por los botones */
+        .df-ui-wrapper .df-ui-btn:hover {
+            color: #ffffff !important; 
+            background-color: #333333 !important;
+        }
+
+        /* Input del número de página (ej. 1/69) */
+        .df-ui-wrapper .df-ui-page-input {
+            color: #ffffff !important;
+            background-color: #2b2b2b !important;
+            border: 1px solid #444 !important;
+        }
+
+        /* Submenús emergentes (como el de compartir o miniaturas) */
+        .df-ui-wrapper .df-ui-share, 
+        .df-ui-wrapper .df-ui-thumb, 
+        .df-ui-wrapper .df-ui-outline {
+            background-color: #1e1e1e !important;
+            color: #ffffff !important;
+            border: 1px solid #333 !important;
+        }
     </style>
 </head>
 <body>
 
     <div class="contenedor-revista">
+        <!-- Ojo: actualicé el option-background-color para que coincida con el nuevo fondo -->
         <div class="_df_book" 
              id="mi_revista"
              source="carta.pdf" 
              option-webgl="false" 
              option-hard="cover"
-             option-background-color="#2b2b2b">
+             option-background-color="#121212">
         </div>
     </div>
 
