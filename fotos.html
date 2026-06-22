@@ -40,58 +40,20 @@
             opacity: 0;
         }
 
-        /* Pantalla de carga (Fondo negro) */
+        /* Pantalla de carga (Transparente para los previews rápidos) */
         .pantalla-carga {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #0a0a0a;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 5;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.2s ease;
-        }
-
-        .pantalla-carga.activa {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        /* UI de la Barra de Progreso */
-        .contenedor-progreso {
-            width: 200px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .texto-porcentaje {
-            color: #ffffff;
-            font-size: 1.2rem;
-            font-weight: 300;
-            letter-spacing: 2px;
-        }
-
-        .barra-fondo {
-            width: 100%;
-            height: 4px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
-            overflow: hidden;
-        }
-
-        .barra-relleno {
-            height: 100%;
-            width: 0%;
-            background-color: #ffffff;
-            transition: width 0.1s linear; /* Movimiento fluido de la barra */
+            /* La mantenemos en el código pero invisible para no estorbar visualmente */
         }
 
         /* Estilos base para botones flotantes */
@@ -121,7 +83,7 @@
             height: 24px;
         }
 
-        /* Ocultar botones suavemente (usamos opacity en vez de display:none para que no se muevan de su sitio) */
+        /* Ocultar botones en los límites */
         .btn-oculto {
             opacity: 0 !important;
             pointer-events: none;
@@ -142,23 +104,26 @@
             left: 50%;
             transform: translateX(-50%);
             display: flex;
+            align-items: center; /* Alinea verticalmente flechas y texto */
             gap: 24px;
             z-index: 10;
+        }
+
+        /* Texto del año */
+        .anio-texto {
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            width: 60px; /* Ancho fijo para que las flechas no se muevan de lugar */
+            text-align: center;
+            user-select: none;
         }
     </style>
 </head>
 <body>
 
-    <div id="pantalla-carga" class="pantalla-carga activa">
-        <div class="contenedor-progreso">
-            <span id="texto-porcentaje" class="texto-porcentaje">0%</span>
-            <div class="barra-fondo">
-                <div id="barra-relleno" class="barra-relleno"></div>
-            </div>
-        </div>
-    </div>
-
-    <a id="btn-descarga" href="#" download class="btn-flotante btn-descarga" title="Descargar foto">
+    <a id="btn-descarga" href="#" download class="btn-flotante btn-descarga" title="Descargar foto en alta resolución">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="7 10 12 15 17 10"></polyline>
@@ -172,6 +137,9 @@
                 <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
         </button>
+        
+        <span id="label-anio" class="anio-texto"></span>
+
         <button id="btn-next" class="btn-flotante" title="Foto siguiente">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="9 18 15 12 9 6"></polyline>
@@ -184,30 +152,47 @@
     </div>
 
     <script>
-        // 1. Configuración
+        // 1. Configuración de Arrays (Previews vs Full Size)
         const totalFotos = 19;
-        const fotos = [];
+        const fotosFull = [];
+        const fotosPreview = [];
+
         for (let i = 1; i <= totalFotos; i++) {
-            fotos.push(String(i).padStart(2, '0') + '.jpg');
+            const numeroFormateado = String(i).padStart(2, '0');
+            fotosFull.push(numeroFormateado + '.jpg');             // Ejemplo: 01.jpg
+            fotosPreview.push(numeroFormateado + 'preview.jpg');   // Ejemplo: 01preview.jpg
         }
 
         let indiceActual = 0;
-        let peticionActual = null; // Guardará la descarga en curso
+        let idPeticionCarga = 0;
 
         // Elementos del DOM
         const imgElement = document.getElementById('foto-actual');
         const btnDescarga = document.getElementById('btn-descarga');
-        const pantallaCarga = document.getElementById('pantalla-carga');
-        const textoPorcentaje = document.getElementById('texto-porcentaje');
-        const barraRelleno = document.getElementById('barra-relleno');
         const btnPrev = document.getElementById('btn-prev');
         const btnNext = document.getElementById('btn-next');
+        const labelAnio = document.getElementById('label-anio');
 
-        // 2. Función principal (Descarga con Progreso)
-        function actualizarVisor() {
-            const nombreArchivo = fotos[indiceActual];
+        // 2. Lógica para determinar el año según el índice de la foto
+        function obtenerAnio(indice) {
+            const numeroFoto = indice + 1; // Convertimos de índice (0-18) a número real (1-19)
             
-            // Lógica para ocultar/mostrar botones en los límites
+            if (numeroFoto >= 1 && numeroFoto <= 4) return "2022";
+            if (numeroFoto >= 5 && numeroFoto <= 12) return "2023";
+            if (numeroFoto === 13) return "2024";
+            if (numeroFoto >= 14 && numeroFoto <= 17) return "2025";
+            if (numeroFoto >= 18 && numeroFoto <= 19) return "2026";
+            
+            return ""; // Por defecto, por si acaso
+        }
+
+        // 3. Función principal de actualización visual
+        function actualizarVisor() {
+            const archivoPreview = fotosPreview[indiceActual];
+            const archivoFull = fotosFull[indiceActual];
+            const idActual = ++idPeticionCarga;
+            
+            // Ocultar/mostrar botones en los límites
             if (indiceActual === 0) {
                 btnPrev.classList.add('btn-oculto');
             } else {
@@ -219,68 +204,35 @@
             } else {
                 btnNext.classList.remove('btn-oculto');
             }
+
+            // Actualizar el texto del año
+            labelAnio.innerText = obtenerAnio(indiceActual);
             
-            // Reiniciar la interfaz de carga
-            pantallaCarga.classList.add('activa');
+            // Efecto suave de transición de imagen
             imgElement.style.opacity = 0;
-            textoPorcentaje.innerText = '0%';
-            barraRelleno.style.width = '0%';
             
-            // Actualizar ruta del botón de descarga real
-            btnDescarga.href = nombreArchivo;
-            btnDescarga.setAttribute('download', nombreArchivo);
+            // Configurar el botón de descarga para que apunte a la imagen pesada
+            btnDescarga.href = archivoFull;
+            btnDescarga.setAttribute('download', archivoFull);
 
-            // Si el usuario toca otro botón mientras cargaba una, cancelamos la descarga anterior
-            if (peticionActual) {
-                peticionActual.abort();
-            }
-
-            // Iniciamos la nueva descarga para poder medir el porcentaje
-            peticionActual = new XMLHttpRequest();
-            peticionActual.open('GET', nombreArchivo, true);
-            peticionActual.responseType = 'blob'; // Pedimos la imagen como archivo crudo
-
-            // Evento que se dispara mientras se descarga
-            peticionActual.onprogress = function(evento) {
-                if (evento.lengthComputable) {
-                    const porcentaje = Math.round((evento.loaded / evento.total) * 100);
-                    textoPorcentaje.innerText = porcentaje + '%';
-                    barraRelleno.style.width = porcentaje + '%';
-                } else {
-                    // Por si el servidor falla en enviar el tamaño total
-                    textoPorcentaje.innerText = 'Cargando...';
+            // Cargar el preview ligero en el visor
+            imgElement.onload = () => {
+                if (idActual === idPeticionCarga) {
+                    imgElement.style.opacity = 1;
+                }
+            };
+            
+            imgElement.onerror = () => {
+                if (idActual === idPeticionCarga) {
+                    console.error("No se pudo cargar el preview:", archivoPreview);
                 }
             };
 
-            // Evento cuando termina de descargar al 100%
-            peticionActual.onload = function() {
-                if (this.status === 200) {
-                    // Convertimos los datos descargados a una URL que la etiqueta <img> pueda leer
-                    const blob = this.response;
-                    const objectURL = URL.createObjectURL(blob);
-
-                    imgElement.onload = () => {
-                        pantallaCarga.classList.remove('activa');
-                        imgElement.style.opacity = 1;
-                        // Liberamos la memoria del navegador
-                        URL.revokeObjectURL(objectURL); 
-                    };
-
-                    imgElement.src = objectURL;
-                }
-            };
-
-            peticionActual.onerror = function() {
-                pantallaCarga.classList.remove('activa');
-                console.error("No se pudo cargar la imagen:", nombreArchivo);
-                textoPorcentaje.innerText = 'Error';
-            };
-
-            // Ejecutar petición
-            peticionActual.send(); 
+            // Disparamos la carga de la miniatura
+            imgElement.src = archivoPreview; 
         }
 
-        // 3. Funciones de Navegación (con límites cerrados)
+        // 4. Funciones de Navegación (con límites cerrados)
         function fotoSiguiente() {
             if (indiceActual < totalFotos - 1) {
                 indiceActual++;
@@ -299,7 +251,7 @@
         btnPrev.addEventListener('click', fotoAnterior);
         btnNext.addEventListener('click', fotoSiguiente);
 
-        // 4. Swipe en pantallas táctiles (respetando límites)
+        // 5. Swipe en pantallas táctiles
         let touchStartX = 0;
         let touchEndX = 0;
         const umbralSwipe = 50;
@@ -322,7 +274,7 @@
             procesarSwipe();
         });
 
-        // 5. Soporte para teclado (respetando límites)
+        // 6. Soporte para teclado
         document.addEventListener('keydown', (e) => {
             if(e.key === 'ArrowLeft') {
                 fotoAnterior();
@@ -331,7 +283,7 @@
             }
         });
 
-        // Carga de la primera foto al abrir la página
+        // Carga inicial
         actualizarVisor();
     </script>
 </body>
