@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diario - Modo Oscuro Total</title>
+    <title>Diario - Modo Oscuro Total (Sin Botones)</title>
 
     <link href="assets/css/dflip.min.css" rel="stylesheet" type="text/css">
     <link href="assets/css/themify-icons.min.css" rel="stylesheet" type="text/css">
@@ -14,7 +14,7 @@
             padding: 0;
             height: 100%;
             width: 100%;
-            /* Gris muy profundo para el fondo general (el que ya te gusta) */
+            /* Gris muy profundo para el fondo general */
             background-color: #121212; 
             overflow: hidden; 
         }
@@ -26,47 +26,14 @@
         }
 
         /* ==================================================
-           MODO OSCURO ROBUSTO PARA EL MENÚ/CONTROLES DE DFLIP
+           OCULTAR INTERFAZ DE USUARIO (SIN BOTONES)
            ================================================== */
         
-        /* 1. Fondo de la barra de controles inferior principal (la "pastilla" blanca) */
-        /* Este selector es más preciso y sobreescribe los estilos por defecto */
-        .df-ui-wrapper .df-ui-controls.df-bottom {
-            background-color: #1e1e1e !important; /* Gris oscuro para el fondo */
-            border-radius: 8px !important; /* Mantiene los bordes redondeados */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6) !important; /* Sombra más oscura y profunda */
-            border: 1px solid #333 !important; /* Borde sutil y oscuro */
-        }
-
-        /* 2. Color general de los iconos y botones para que sean claros */
-        .df-ui-wrapper .df-ui-btn {
-            color: #b3b3b3 !important; /* Gris claro para los iconos en estado normal */
-            background-color: transparent !important; /* Fondo transparente */
-        }
-
-        /* 3. Efecto al pasar el dedo/ratón (hover) por los botones */
-        .df-ui-wrapper .df-ui-btn:hover {
-            color: #ffffff !important; /* Icono blanco puro al interactuar */
-            background-color: #333333 !important; /* Fondo más claro al interactuar */
-        }
-
-        /* 4. Input del número de página (ej. 1/69) */
-        .df-ui-wrapper .df-ui-page-input {
-            color: #ffffff !important; /* Texto blanco para el número de página */
-            background-color: #2b2b2b !important; /* Fondo oscuro del input */
-            border: 1px solid #444 !important; /* Borde oscuro */
-            padding: 2px 5px !important;
-        }
-
-        /* 5. Submenús emergentes (como el de compartir o miniaturas) */
-        /* Nos aseguramos de que estos menús, si se abren, también sean oscuros */
-        .df-ui-wrapper .df-ui-share, 
-        .df-ui-wrapper .df-ui-thumb, 
-        .df-ui-wrapper .df-ui-outline,
-        .df-ui-wrapper .df-ui-list {
-            background-color: #1e1e1e !important;
-            color: #ffffff !important;
-            border: 1px solid #333 !important;
+        /* Esta regla oculta completamente la barra inferior, los botones laterales 
+           y cualquier control visible de dFlip, dejando habilitada únicamente 
+           la funcionalidad táctil y de arrastre para pasar las páginas. */
+        .df-ui-wrapper {
+            display: none !important;
         }
 
     </style>
@@ -74,7 +41,6 @@
 <body>
 
     <div class="contenedor-revista">
-        <!-- Mantenemos el fondo oscuro general del libro -->
         <div class="_df_book" 
              id="mi_revista"
              source="carta.pdf" 
