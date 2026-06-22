@@ -16,7 +16,7 @@
             width: 100%;
             height: 100%;
             background-color: #0a0a0a;
-            overflow: hidden; /* Evita scroll no deseado */
+            overflow: hidden;
             font-family: system-ui, -apple-system, sans-serif;
         }
 
@@ -33,16 +33,51 @@
         #foto-actual {
             max-width: 100%;
             max-height: 100%;
-            object-fit: contain; /* Mantiene la proporción de la foto */
-            transition: opacity 0.3s ease; /* Transición suave al cambiar de foto */
+            object-fit: contain;
+            transition: opacity 0.3s ease;
             user-select: none;
             -webkit-user-drag: none;
+            opacity: 0; /* Inicia oculta para la primera carga */
+        }
+
+        /* Pantalla de carga (Loader) */
+        .pantalla-carga {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0a0a0a; /* Fondo negro */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 5; /* Por encima de la foto, por debajo de los botones */
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .pantalla-carga.activa {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* Animación del spinner dando vueltas */
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: #ffffff;
+            border-radius: 50%;
+            animation: girar 1s linear infinite;
+        }
+
+        @keyframes girar {
+            to { transform: rotate(360deg); }
         }
 
         /* Estilos base para todos los botones flotantes */
         .btn-flotante {
-            position: absolute;
-            z-index: 10;
             background-color: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(8px);
             border: 1px solid rgba(255, 255, 255, 0.15);
@@ -60,6 +95,7 @@
 
         .btn-flotante:hover {
             background-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
         }
 
         .btn-flotante svg {
@@ -67,51 +103,31 @@
             height: 24px;
         }
 
-        /* Botón de descarga */
+        /* Botón de descarga en la esquina superior derecha */
         .btn-descarga {
+            position: absolute;
             top: 24px;
             right: 24px;
+            z-index: 10;
         }
 
-        .btn-descarga:hover {
-            transform: scale(1.05);
+        /* Contenedor inferior para las flechas */
+        .nav-container {
+            position: absolute;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 24px;
+            z-index: 10;
         }
-
-        /* Botones de navegación (Flechas) */
-        .btn-nav {
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        .btn-prev {
-            left: 24px;
-        }
-
-        /* En el hover debemos mantener el translateY para que no salte */
-        .btn-prev:hover {
-            transform: translateY(-50%) scale(1.05);
-        }
-
-        .btn-next {
-            right: 24px;
-        }
-
-        .btn-next:hover {
-            transform: translateY(-50%) scale(1.05);
-        }
-
-        /* Ocultar flechas en móviles muy pequeños si se desea, aunque con 50px suelen caber bien. 
-           Si prefieres que en móviles sean más pequeños, puedes descomentar esto: */
-        /*
-        @media (max-width: 600px) {
-            .btn-flotante { width: 40px; height: 40px; }
-            .btn-prev { left: 10px; }
-            .btn-next { right: 10px; }
-        }
-        */
     </style>
 </head>
 <body>
+
+    <div id="pantalla-carga" class="pantalla-carga activa">
+        <div class="spinner"></div>
+    </div>
 
     <a id="btn-descarga" href="#" download class="btn-flotante btn-descarga" title="Descargar foto">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -121,17 +137,18 @@
         </svg>
     </a>
 
-    <button id="btn-prev" class="btn-flotante btn-nav btn-prev" title="Foto anterior">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
-    </button>
-
-    <button id="btn-next" class="btn-flotante btn-nav btn-next" title="Foto siguiente">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="9 18 15 12 9 6"></polyline>
-        </svg>
-    </button>
+    <div class="nav-container">
+        <button id="btn-prev" class="btn-flotante" title="Foto anterior">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </button>
+        <button id="btn-next" class="btn-flotante" title="Foto siguiente">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        </button>
+    </div>
 
     <div class="visor-container" id="visor">
         <img id="foto-actual" src="" alt="Vista de fotografía">
@@ -146,25 +163,68 @@
         }
 
         let indiceActual = 0;
+        let idPeticionCarga = 0; // Evita conflictos si se presiona el botón muy rápido
+
         const imgElement = document.getElementById('foto-actual');
         const btnDescarga = document.getElementById('btn-descarga');
+        const pantallaCarga = document.getElementById('pantalla-carga');
 
         // 2. Función para cargar y actualizar la vista
         function actualizarVisor() {
             const nombreArchivo = fotos[indiceActual];
             
-            // Efecto de desvanecimiento
+            // Creamos un ID único para esta petición de carga
+            const idActual = ++idPeticionCarga;
+            
+            // Mostramos la pantalla de carga y ocultamos la imagen
+            pantallaCarga.classList.add('activa');
             imgElement.style.opacity = 0;
             
-            setTimeout(() => {
-                imgElement.src = nombreArchivo;
-                btnDescarga.href = nombreArchivo;
-                btnDescarga.setAttribute('download', nombreArchivo);
-                imgElement.style.opacity = 1;
-            }, 150); // Sincronizado con la transición CSS
+            // Creamos una imagen temporal para descargarla sin afectar la vista actual
+            const imgTemp = new Image();
+            
+            imgTemp.onload = () => {
+                // Solo actualizamos si esta es la última foto que el usuario pidió
+                if (idActual === idPeticionCarga) {
+                    imgElement.src = nombreArchivo;
+                    btnDescarga.href = nombreArchivo;
+                    btnDescarga.setAttribute('download', nombreArchivo);
+                    
+                    // Ocultamos la pantalla de carga y revelamos la imagen
+                    pantallaCarga.classList.remove('activa');
+                    imgElement.style.opacity = 1;
+
+                    // Una vez cargada, precargamos las fotos adyacentes
+                    precargarAdyacentes();
+                }
+            };
+            
+            imgTemp.onerror = () => {
+                // Si hay error (ej. falta la foto), quitamos el loader para no dejar la pantalla negra infinita
+                if (idActual === idPeticionCarga) {
+                    pantallaCarga.classList.remove('activa');
+                    console.error("Error al cargar la imagen: " + nombreArchivo);
+                }
+            };
+
+            // Inicia la descarga
+            imgTemp.src = nombreArchivo; 
         }
 
-        // 3. Funciones de navegación reutilizables
+        // 3. Función para precargar imágenes y acelerar la navegación
+        function precargarAdyacentes() {
+            const indicePrev = (indiceActual > 0) ? indiceActual - 1 : totalFotos - 1;
+            const indiceNext = (indiceActual < totalFotos - 1) ? indiceActual + 1 : 0;
+            
+            // Al asignar el src a un nuevo objeto Image, el navegador lo guarda en caché
+            const imgNext = new Image();
+            imgNext.src = fotos[indiceNext];
+            
+            const imgPrev = new Image();
+            imgPrev.src = fotos[indicePrev];
+        }
+
+        // 4. Funciones de navegación
         function fotoSiguiente() {
             indiceActual = (indiceActual < totalFotos - 1) ? indiceActual + 1 : 0;
             actualizarVisor();
@@ -175,7 +235,7 @@
             actualizarVisor();
         }
 
-        // 4. Eventos de los botones de navegación
+        // Eventos de los botones de navegación
         document.getElementById('btn-prev').addEventListener('click', fotoAnterior);
         document.getElementById('btn-next').addEventListener('click', fotoSiguiente);
 
@@ -186,12 +246,9 @@
 
         function procesarSwipe() {
             const distancia = touchEndX - touchStartX;
-            
             if (distancia > umbralSwipe) {
-                // Swipe hacia la derecha (Anterior)
                 fotoAnterior();
             } else if (distancia < -umbralSwipe) {
-                // Swipe hacia la izquierda (Siguiente)
                 fotoSiguiente();
             }
         }
