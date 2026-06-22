@@ -29,11 +29,19 @@
            OCULTAR INTERFAZ DE USUARIO (SIN BOTONES)
            ================================================== */
         
-        /* Esta regla oculta completamente la barra inferior, los botones laterales 
-           y cualquier control visible de dFlip, dejando habilitada únicamente 
-           la funcionalidad táctil y de arrastre para pasar las páginas. */
-        .df-ui-wrapper {
+        /* Oculta la barra de herramientas inferior */
+        .df-ui-controls {
             display: none !important;
+        }
+
+        /* Oculta las flechas laterales (Siguiente / Anterior) */
+        .df-ui-btn {
+            display: none !important;
+        }
+        
+        /* Asegura que la capa invisible de la UI no estorbe los gestos táctiles */
+        .df-ui {
+            pointer-events: none !important;
         }
 
     </style>
