@@ -27,6 +27,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            position: relative;
         }
 
         #foto-actual {
@@ -38,15 +39,13 @@
             -webkit-user-drag: none;
         }
 
-        /* Botón de descarga minimalista flotante */
-        .btn-descarga {
+        /* Estilos base para todos los botones flotantes */
+        .btn-flotante {
             position: absolute;
-            top: 24px;
-            right: 24px;
             z-index: 10;
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -59,26 +58,80 @@
             transition: background-color 0.2s ease, transform 0.2s ease;
         }
 
-        .btn-descarga:hover {
+        .btn-flotante:hover {
             background-color: rgba(255, 255, 255, 0.2);
-            transform: scale(1.05);
         }
 
-        .btn-descarga svg {
+        .btn-flotante svg {
             width: 24px;
             height: 24px;
         }
+
+        /* Botón de descarga */
+        .btn-descarga {
+            top: 24px;
+            right: 24px;
+        }
+
+        .btn-descarga:hover {
+            transform: scale(1.05);
+        }
+
+        /* Botones de navegación (Flechas) */
+        .btn-nav {
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .btn-prev {
+            left: 24px;
+        }
+
+        /* En el hover debemos mantener el translateY para que no salte */
+        .btn-prev:hover {
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .btn-next {
+            right: 24px;
+        }
+
+        .btn-next:hover {
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        /* Ocultar flechas en móviles muy pequeños si se desea, aunque con 50px suelen caber bien. 
+           Si prefieres que en móviles sean más pequeños, puedes descomentar esto: */
+        /*
+        @media (max-width: 600px) {
+            .btn-flotante { width: 40px; height: 40px; }
+            .btn-prev { left: 10px; }
+            .btn-next { right: 10px; }
+        }
+        */
     </style>
 </head>
 <body>
 
-    <a id="btn-descarga" href="#" download class="btn-descarga" title="Descargar foto">
+    <a id="btn-descarga" href="#" download class="btn-flotante btn-descarga" title="Descargar foto">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="7 10 12 15 17 10"></polyline>
             <line x1="12" y1="15" x2="12" y2="3"></line>
         </svg>
     </a>
+
+    <button id="btn-prev" class="btn-flotante btn-nav btn-prev" title="Foto anterior">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+    </button>
+
+    <button id="btn-next" class="btn-flotante btn-nav btn-next" title="Foto siguiente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+    </button>
 
     <div class="visor-container" id="visor">
         <img id="foto-actual" src="" alt="Vista de fotografía">
@@ -89,7 +142,6 @@
         const totalFotos = 19;
         const fotos = [];
         for (let i = 1; i <= totalFotos; i++) {
-            // padStart asegura que el formato sea 01, 02, etc.
             fotos.push(String(i).padStart(2, '0') + '.jpg');
         }
 
@@ -112,22 +164,35 @@
             }, 150); // Sincronizado con la transición CSS
         }
 
-        // 3. Lógica para detectar el deslizamiento (Swipe) en pantallas táctiles
+        // 3. Funciones de navegación reutilizables
+        function fotoSiguiente() {
+            indiceActual = (indiceActual < totalFotos - 1) ? indiceActual + 1 : 0;
+            actualizarVisor();
+        }
+
+        function fotoAnterior() {
+            indiceActual = (indiceActual > 0) ? indiceActual - 1 : totalFotos - 1;
+            actualizarVisor();
+        }
+
+        // 4. Eventos de los botones de navegación
+        document.getElementById('btn-prev').addEventListener('click', fotoAnterior);
+        document.getElementById('btn-next').addEventListener('click', fotoSiguiente);
+
+        // 5. Lógica para detectar el deslizamiento (Swipe) en pantallas táctiles
         let touchStartX = 0;
         let touchEndX = 0;
-        const umbralSwipe = 50; // Distancia mínima en píxeles para considerar un swipe
+        const umbralSwipe = 50;
 
         function procesarSwipe() {
             const distancia = touchEndX - touchStartX;
             
             if (distancia > umbralSwipe) {
                 // Swipe hacia la derecha (Anterior)
-                indiceActual = (indiceActual > 0) ? indiceActual - 1 : totalFotos - 1;
-                actualizarVisor();
+                fotoAnterior();
             } else if (distancia < -umbralSwipe) {
                 // Swipe hacia la izquierda (Siguiente)
-                indiceActual = (indiceActual < totalFotos - 1) ? indiceActual + 1 : 0;
-                actualizarVisor();
+                fotoSiguiente();
             }
         }
 
@@ -140,14 +205,12 @@
             procesarSwipe();
         });
 
-        // 4. Extra: Soporte para flechas del teclado en PC
+        // 6. Soporte para flechas del teclado en PC
         document.addEventListener('keydown', (e) => {
             if(e.key === 'ArrowLeft') {
-                indiceActual = (indiceActual > 0) ? indiceActual - 1 : totalFotos - 1;
-                actualizarVisor();
+                fotoAnterior();
             } else if(e.key === 'ArrowRight') {
-                indiceActual = (indiceActual < totalFotos - 1) ? indiceActual + 1 : 0;
-                actualizarVisor();
+                fotoSiguiente();
             }
         });
 
