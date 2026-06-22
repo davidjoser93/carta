@@ -47,11 +47,11 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #0a0a0a; /* Fondo negro */
+            background-color: #0a0a0a;
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 5; /* Por encima de la foto, por debajo de los botones */
+            z-index: 5;
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.2s ease;
@@ -159,72 +159,52 @@
         const totalFotos = 19;
         const fotos = [];
         for (let i = 1; i <= totalFotos; i++) {
+            // Asegúrate de que tus fotos en GitHub terminen exactamente en ".jpg" minúscula
             fotos.push(String(i).padStart(2, '0') + '.jpg');
         }
 
         let indiceActual = 0;
-        let idPeticionCarga = 0; // Evita conflictos si se presiona el botón muy rápido
+        let idPeticionCarga = 0;
 
         const imgElement = document.getElementById('foto-actual');
         const btnDescarga = document.getElementById('btn-descarga');
         const pantallaCarga = document.getElementById('pantalla-carga');
 
-        // 2. Función para cargar y actualizar la vista
+        // 2. Función principal optimizada para archivos pesados
         function actualizarVisor() {
             const nombreArchivo = fotos[indiceActual];
-            
-            // Creamos un ID único para esta petición de carga
             const idActual = ++idPeticionCarga;
             
-            // Mostramos la pantalla de carga y ocultamos la imagen
+            // Activar loader y ocultar imagen inmediatamente
             pantallaCarga.classList.add('activa');
             imgElement.style.opacity = 0;
             
-            // Creamos una imagen temporal para descargarla sin afectar la vista actual
-            const imgTemp = new Image();
-            
-            imgTemp.onload = () => {
-                // Solo actualizamos si esta es la última foto que el usuario pidió
+            // Actualizar botón de descarga
+            btnDescarga.href = nombreArchivo;
+            btnDescarga.setAttribute('download', nombreArchivo);
+
+            // Asignamos los eventos de carga directamente a la etiqueta <img> visible.
+            // Esto prioriza la red y cancela descargas en curso si el usuario toca rápido.
+            imgElement.onload = () => {
                 if (idActual === idPeticionCarga) {
-                    imgElement.src = nombreArchivo;
-                    btnDescarga.href = nombreArchivo;
-                    btnDescarga.setAttribute('download', nombreArchivo);
-                    
-                    // Ocultamos la pantalla de carga y revelamos la imagen
                     pantallaCarga.classList.remove('activa');
                     imgElement.style.opacity = 1;
-
-                    // Una vez cargada, precargamos las fotos adyacentes
-                    precargarAdyacentes();
                 }
             };
             
-            imgTemp.onerror = () => {
-                // Si hay error (ej. falta la foto), quitamos el loader para no dejar la pantalla negra infinita
+            imgElement.onerror = () => {
                 if (idActual === idPeticionCarga) {
+                    // Si el archivo no existe (ej. error 404 por mayúsculas), ocultamos el loader para no dejarlo infinito
                     pantallaCarga.classList.remove('activa');
-                    console.error("Error al cargar la imagen: " + nombreArchivo);
+                    console.error("No se pudo cargar la imagen:", nombreArchivo);
                 }
             };
 
-            // Inicia la descarga
-            imgTemp.src = nombreArchivo; 
+            // Disparamos la descarga
+            imgElement.src = nombreArchivo; 
         }
 
-        // 3. Función para precargar imágenes y acelerar la navegación
-        function precargarAdyacentes() {
-            const indicePrev = (indiceActual > 0) ? indiceActual - 1 : totalFotos - 1;
-            const indiceNext = (indiceActual < totalFotos - 1) ? indiceActual + 1 : 0;
-            
-            // Al asignar el src a un nuevo objeto Image, el navegador lo guarda en caché
-            const imgNext = new Image();
-            imgNext.src = fotos[indiceNext];
-            
-            const imgPrev = new Image();
-            imgPrev.src = fotos[indicePrev];
-        }
-
-        // 4. Funciones de navegación
+        // 3. Navegación
         function fotoSiguiente() {
             indiceActual = (indiceActual < totalFotos - 1) ? indiceActual + 1 : 0;
             actualizarVisor();
@@ -235,11 +215,11 @@
             actualizarVisor();
         }
 
-        // Eventos de los botones de navegación
+        // Botones físicos
         document.getElementById('btn-prev').addEventListener('click', fotoAnterior);
         document.getElementById('btn-next').addEventListener('click', fotoSiguiente);
 
-        // 5. Lógica para detectar el deslizamiento (Swipe) en pantallas táctiles
+        // 4. Swipe en pantallas táctiles
         let touchStartX = 0;
         let touchEndX = 0;
         const umbralSwipe = 50;
@@ -262,7 +242,7 @@
             procesarSwipe();
         });
 
-        // 6. Soporte para flechas del teclado en PC
+        // 5. Flechas del teclado
         document.addEventListener('keydown', (e) => {
             if(e.key === 'ArrowLeft') {
                 fotoAnterior();
@@ -271,7 +251,7 @@
             }
         });
 
-        // Carga inicial de la primera foto
+        // Iniciar la primera carga
         actualizarVisor();
     </script>
 </body>
