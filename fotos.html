@@ -37,10 +37,10 @@
             transition: opacity 0.3s ease;
             user-select: none;
             -webkit-user-drag: none;
-            opacity: 0; /* Inicia oculta para la primera carga */
+            opacity: 0;
         }
 
-        /* Pantalla de carga (Loader) */
+        /* Pantalla de carga (Fondo negro) */
         .pantalla-carga {
             position: absolute;
             top: 0;
@@ -49,6 +49,7 @@
             height: 100%;
             background-color: #0a0a0a;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 5;
@@ -62,21 +63,38 @@
             pointer-events: all;
         }
 
-        /* Animación del spinner dando vueltas */
-        .spinner {
-            width: 48px;
-            height: 48px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-left-color: #ffffff;
-            border-radius: 50%;
-            animation: girar 1s linear infinite;
+        /* UI de la Barra de Progreso */
+        .contenedor-progreso {
+            width: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
         }
 
-        @keyframes girar {
-            to { transform: rotate(360deg); }
+        .texto-porcentaje {
+            color: #ffffff;
+            font-size: 1.2rem;
+            font-weight: 300;
+            letter-spacing: 2px;
         }
 
-        /* Estilos base para todos los botones flotantes */
+        .barra-fondo {
+            width: 100%;
+            height: 4px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .barra-relleno {
+            height: 100%;
+            width: 0%;
+            background-color: #ffffff;
+            transition: width 0.1s linear; /* Movimiento fluido de la barra */
+        }
+
+        /* Estilos base para botones flotantes */
         .btn-flotante {
             background-color: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(8px);
@@ -90,7 +108,7 @@
             color: #ffffff;
             cursor: pointer;
             text-decoration: none;
-            transition: background-color 0.2s ease, transform 0.2s ease;
+            transition: background-color 0.2s ease, transform 0.2s ease, opacity 0.3s ease;
         }
 
         .btn-flotante:hover {
@@ -103,7 +121,13 @@
             height: 24px;
         }
 
-        /* Botón de descarga en la esquina superior derecha */
+        /* Ocultar botones suavemente (usamos opacity en vez de display:none para que no se muevan de su sitio) */
+        .btn-oculto {
+            opacity: 0 !important;
+            pointer-events: none;
+        }
+
+        /* Botón de descarga */
         .btn-descarga {
             position: absolute;
             top: 24px;
@@ -111,7 +135,7 @@
             z-index: 10;
         }
 
-        /* Contenedor inferior para las flechas */
+        /* Controles de navegación inferiores */
         .nav-container {
             position: absolute;
             bottom: 32px;
@@ -126,7 +150,12 @@
 <body>
 
     <div id="pantalla-carga" class="pantalla-carga activa">
-        <div class="spinner"></div>
+        <div class="contenedor-progreso">
+            <span id="texto-porcentaje" class="texto-porcentaje">0%</span>
+            <div class="barra-fondo">
+                <div id="barra-relleno" class="barra-relleno"></div>
+            </div>
+        </div>
     </div>
 
     <a id="btn-descarga" href="#" download class="btn-flotante btn-descarga" title="Descargar foto">
@@ -138,7 +167,7 @@
     </a>
 
     <div class="nav-container">
-        <button id="btn-prev" class="btn-flotante" title="Foto anterior">
+        <button id="btn-prev" class="btn-flotante btn-oculto" title="Foto anterior">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
@@ -155,71 +184,122 @@
     </div>
 
     <script>
-        // 1. Configuración de imágenes (del 01 al 19)
+        // 1. Configuración
         const totalFotos = 19;
         const fotos = [];
         for (let i = 1; i <= totalFotos; i++) {
-            // Asegúrate de que tus fotos en GitHub terminen exactamente en ".jpg" minúscula
             fotos.push(String(i).padStart(2, '0') + '.jpg');
         }
 
         let indiceActual = 0;
-        let idPeticionCarga = 0;
+        let peticionActual = null; // Guardará la descarga en curso
 
+        // Elementos del DOM
         const imgElement = document.getElementById('foto-actual');
         const btnDescarga = document.getElementById('btn-descarga');
         const pantallaCarga = document.getElementById('pantalla-carga');
+        const textoPorcentaje = document.getElementById('texto-porcentaje');
+        const barraRelleno = document.getElementById('barra-relleno');
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
 
-        // 2. Función principal optimizada para archivos pesados
+        // 2. Función principal (Descarga con Progreso)
         function actualizarVisor() {
             const nombreArchivo = fotos[indiceActual];
-            const idActual = ++idPeticionCarga;
             
-            // Activar loader y ocultar imagen inmediatamente
+            // Lógica para ocultar/mostrar botones en los límites
+            if (indiceActual === 0) {
+                btnPrev.classList.add('btn-oculto');
+            } else {
+                btnPrev.classList.remove('btn-oculto');
+            }
+
+            if (indiceActual === totalFotos - 1) {
+                btnNext.classList.add('btn-oculto');
+            } else {
+                btnNext.classList.remove('btn-oculto');
+            }
+            
+            // Reiniciar la interfaz de carga
             pantallaCarga.classList.add('activa');
             imgElement.style.opacity = 0;
+            textoPorcentaje.innerText = '0%';
+            barraRelleno.style.width = '0%';
             
-            // Actualizar botón de descarga
+            // Actualizar ruta del botón de descarga real
             btnDescarga.href = nombreArchivo;
             btnDescarga.setAttribute('download', nombreArchivo);
 
-            // Asignamos los eventos de carga directamente a la etiqueta <img> visible.
-            // Esto prioriza la red y cancela descargas en curso si el usuario toca rápido.
-            imgElement.onload = () => {
-                if (idActual === idPeticionCarga) {
-                    pantallaCarga.classList.remove('activa');
-                    imgElement.style.opacity = 1;
-                }
-            };
-            
-            imgElement.onerror = () => {
-                if (idActual === idPeticionCarga) {
-                    // Si el archivo no existe (ej. error 404 por mayúsculas), ocultamos el loader para no dejarlo infinito
-                    pantallaCarga.classList.remove('activa');
-                    console.error("No se pudo cargar la imagen:", nombreArchivo);
+            // Si el usuario toca otro botón mientras cargaba una, cancelamos la descarga anterior
+            if (peticionActual) {
+                peticionActual.abort();
+            }
+
+            // Iniciamos la nueva descarga para poder medir el porcentaje
+            peticionActual = new XMLHttpRequest();
+            peticionActual.open('GET', nombreArchivo, true);
+            peticionActual.responseType = 'blob'; // Pedimos la imagen como archivo crudo
+
+            // Evento que se dispara mientras se descarga
+            peticionActual.onprogress = function(evento) {
+                if (evento.lengthComputable) {
+                    const porcentaje = Math.round((evento.loaded / evento.total) * 100);
+                    textoPorcentaje.innerText = porcentaje + '%';
+                    barraRelleno.style.width = porcentaje + '%';
+                } else {
+                    // Por si el servidor falla en enviar el tamaño total
+                    textoPorcentaje.innerText = 'Cargando...';
                 }
             };
 
-            // Disparamos la descarga
-            imgElement.src = nombreArchivo; 
+            // Evento cuando termina de descargar al 100%
+            peticionActual.onload = function() {
+                if (this.status === 200) {
+                    // Convertimos los datos descargados a una URL que la etiqueta <img> pueda leer
+                    const blob = this.response;
+                    const objectURL = URL.createObjectURL(blob);
+
+                    imgElement.onload = () => {
+                        pantallaCarga.classList.remove('activa');
+                        imgElement.style.opacity = 1;
+                        // Liberamos la memoria del navegador
+                        URL.revokeObjectURL(objectURL); 
+                    };
+
+                    imgElement.src = objectURL;
+                }
+            };
+
+            peticionActual.onerror = function() {
+                pantallaCarga.classList.remove('activa');
+                console.error("No se pudo cargar la imagen:", nombreArchivo);
+                textoPorcentaje.innerText = 'Error';
+            };
+
+            // Ejecutar petición
+            peticionActual.send(); 
         }
 
-        // 3. Navegación
+        // 3. Funciones de Navegación (con límites cerrados)
         function fotoSiguiente() {
-            indiceActual = (indiceActual < totalFotos - 1) ? indiceActual + 1 : 0;
-            actualizarVisor();
+            if (indiceActual < totalFotos - 1) {
+                indiceActual++;
+                actualizarVisor();
+            }
         }
 
         function fotoAnterior() {
-            indiceActual = (indiceActual > 0) ? indiceActual - 1 : totalFotos - 1;
-            actualizarVisor();
+            if (indiceActual > 0) {
+                indiceActual--;
+                actualizarVisor();
+            }
         }
 
-        // Botones físicos
-        document.getElementById('btn-prev').addEventListener('click', fotoAnterior);
-        document.getElementById('btn-next').addEventListener('click', fotoSiguiente);
+        // Eventos en botones
+        btnPrev.addEventListener('click', fotoAnterior);
+        btnNext.addEventListener('click', fotoSiguiente);
 
-        // 4. Swipe en pantallas táctiles
+        // 4. Swipe en pantallas táctiles (respetando límites)
         let touchStartX = 0;
         let touchEndX = 0;
         const umbralSwipe = 50;
@@ -227,9 +307,9 @@
         function procesarSwipe() {
             const distancia = touchEndX - touchStartX;
             if (distancia > umbralSwipe) {
-                fotoAnterior();
+                fotoAnterior(); // Deslizar derecha
             } else if (distancia < -umbralSwipe) {
-                fotoSiguiente();
+                fotoSiguiente(); // Deslizar izquierda
             }
         }
 
@@ -242,7 +322,7 @@
             procesarSwipe();
         });
 
-        // 5. Flechas del teclado
+        // 5. Soporte para teclado (respetando límites)
         document.addEventListener('keydown', (e) => {
             if(e.key === 'ArrowLeft') {
                 fotoAnterior();
@@ -251,7 +331,7 @@
             }
         });
 
-        // Iniciar la primera carga
+        // Carga de la primera foto al abrir la página
         actualizarVisor();
     </script>
 </body>
