@@ -14,7 +14,6 @@
             padding: 0;
             height: 100%;
             width: 100%;
-            /* Gris muy profundo para el fondo general */
             background-color: #121212; 
             overflow: hidden; 
         }
@@ -29,21 +28,18 @@
            PERSONALIZACIÓN DE INTERFAZ (SOLO FLECHAS LATERALES)
            ================================================== */
         
-        /* 1. Oculta toda la barra de herramientas inferior (zoom, compartir, etc.) */
         .df-ui-controls {
             display: none !important;
         }
 
-        /* 2. Oculta todos los botones de la interfaz por defecto */
         .df-ui-btn {
             display: none !important;
         }
         
-        /* 3. Fuerza a mostrar ÚNICAMENTE los botones de Siguiente y Anterior */
         .df-ui-btn.df-ui-next,
         .df-ui-btn.df-ui-prev {
-            display: flex !important; /* Usamos flex para que el ícono siga centrado */
-            pointer-events: auto !important; /* Asegura que sean clickeables */
+            display: flex !important; 
+            pointer-events: auto !important; 
         }
 
         /* ==================================================
@@ -54,31 +50,38 @@
             position: fixed;
             top: 50%;
             left: 50%;
-            /* Centra exactamente en el medio */
             transform: translate(-50%, -50%); 
-            z-index: 9999; /* Asegura que esté por encima de todo */
-            /* ¡ESTA ES LA CLAVE! Hace que el elemento sea intocable y no bloquee el clic hacia el PDF */
-            pointer-events: none; 
+            z-index: 9999; 
+            pointer-events: none; /* Atraviesa los clics hacia la revista */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: rgba(255, 255, 255, 0.8);
-            transition: opacity 0.5s ease-out; /* Transición suave al desaparecer */
+            color: rgba(255, 255, 255, 0.85);
+            
+            /* Empieza oculto */
+            opacity: 0; 
+            visibility: hidden;
+            transition: opacity 0.8s ease-in-out, visibility 0.8s ease-in-out; 
+        }
+
+        /* Clase que se añade por JS para mostrar la manita */
+        #indicador-toque.visible {
+            opacity: 1;
+            visibility: visible;
         }
 
         .icono-manita {
-            width: 70px;
-            height: 70px;
-            /* Agrega la animación de pulso */
+            width: 65px; /* Ancho fijo */
+            height: auto; /* Alto automático para no aplastarse */
             animation: latido 1.5s infinite ease-in-out; 
-            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
         }
 
         @keyframes latido {
-            0% { transform: scale(0.9); opacity: 0.6; }
-            50% { transform: scale(1.1); opacity: 1; }
-            100% { transform: scale(0.9); opacity: 0.6; }
+            0% { transform: scale(0.95); opacity: 0.7; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.7; }
         }
 
     </style>
@@ -86,13 +89,12 @@
 <body>
 
     <div id="indicador-toque">
-        <svg class="icono-manita" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 11V6a2 2 0 0 1 4 0v10"></path>
-            <path d="M13 10V8a2 2 0 0 1 4 0v10"></path>
-            <path d="M17 13v-1a2 2 0 0 1 4 0v7a5 5 0 0 1-5 5H9a7 7 0 0 1-7-7V9a2 2 0 0 1 4 0v6"></path>
-            <path d="M12 2v2"></path>
-            <path d="M15.5 3.5l-1.4 1.4"></path>
-            <path d="M17 7h-2"></path>
+        <svg class="icono-manita" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 13V5a2 2 0 1 1 4 0v6.5"></path>
+            <path d="M14 11.5h1.5a2.5 2.5 0 0 1 2.5 2.5v2a5 5 0 0 1-5 5h-2a5 5 0 0 1-5-5V13a2 2 0 0 1 2-2h2"></path>
+            <path d="M12 2v1"></path>
+            <path d="M16 4l-1 1"></path>
+            <path d="M8 4l1 1"></path>
         </svg>
     </div>
 
@@ -109,7 +111,6 @@
     <script src="assets/js/jquery.min.js"></script>
 
     <script>
-        // Configuración de la ubicación base para assets
         var dFlipLocation = "assets/";
     </script>
 
@@ -117,23 +118,39 @@
 
     <script>
         // ==================================================
-        // LÓGICA PARA DESAPARECER LA MANITA AL TOCAR
+        // LÓGICA DE APARICIÓN Y DESAPARICIÓN DE LA MANITA
         // ==================================================
         
-        // Usamos 'pointerdown' porque captura tanto toques en pantallas móviles como clics de ratón
+        let usuarioYaToco = false;
+
+        // 1. Mostrar después de 2 segundos de cargar la página
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                // Si el usuario no ha tocado aún la pantalla, mostramos la manita
+                if (!usuarioYaToco) {
+                    var indicador = document.getElementById('indicador-toque');
+                    if (indicador) {
+                        indicador.classList.add('visible');
+                    }
+                }
+            }, 2000); // 2000 milisegundos = 2 segundos
+        });
+
+        // 2. Desaparecer al primer toque en cualquier parte
         document.addEventListener('pointerdown', function() {
+            usuarioYaToco = true; // Registramos que ya tocó
             var indicador = document.getElementById('indicador-toque');
             
             if (indicador) {
-                // Inicia la transición CSS de desvanecimiento
+                // Forzamos la opacidad a 0 para que se desvanezca
                 indicador.style.opacity = '0';
                 
-                // Espera medio segundo (lo que dura la transición) para eliminarlo completamente del HTML
+                // Lo eliminamos del DOM tras la transición (800ms)
                 setTimeout(function() {
                     indicador.remove();
-                }, 500);
+                }, 800);
             }
-        }, { once: true }); // { once: true } asegura que esta función se escuche y ejecute solo una vez para no gastar recursos
+        }, { once: true }); // Se ejecuta una sola vez
     </script>
 
 </body>
