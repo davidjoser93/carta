@@ -57,8 +57,6 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            /* Color blanco levemente translúcido */
-            color: rgba(255, 255, 255, 0.85); 
             
             /* Empieza oculto */
             opacity: 0; 
@@ -73,10 +71,11 @@
         }
 
         .icono-manita {
-            width: 75px; /* Un tamaño un poco más grande y claro */
+            width: 75px; /* Puedes ajustar este tamaño según cómo se vea tu imagen webp */
             height: auto; 
             animation: latido 1.5s infinite ease-in-out; 
-            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.3));
+            /* Esta sombra le dará un toque de luz por detrás a tu imagen, si tiene fondo transparente */
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.4));
         }
 
         @keyframes latido {
@@ -91,10 +90,8 @@
 
     <!-- Animación flotante de la manita -->
     <div id="indicador-toque">
-        <!-- SVG de mano detallado, inconfundible y profesional -->
-        <svg class="icono-manita" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M6.75 1a.75.75 0 0 1 .75.75V8a.5.5 0 0 0 1 0V5.467l.086-.004c.316-.014.618-.061.914-.1432A.492.492 0 0 1 10.5 5.5v1.84a.5.5 0 0 0 1 0V6.5c0-.276.224-.5.5-.5s.5.224.5.5v1.34a.5.5 0 0 0 1 0V7.5c0-.276.224-.5.5-.5s.5.224.5.5v5.5a4.5 4.5 0 0 1-4.5 4.5h-2.5a4.5 4.5 0 0 1-4.5-4.5V3a.5.5 0 0 1 .5-.5h.5V1.75a.75.75 0 0 1 .75-.75M11.5 7.221A1.5 1.5 0 0 0 10.5 6.5v-.5a1.5 1.5 0 0 0-1-1.415V2.5a1.5 1.5 0 0 0-3 0v6.177a1.5 1.5 0 0 0-.616-.251l-.382-.038C4.542 8.303 4 8.784 4 9.38v4.12a3.5 3.5 0 0 0 3.5 3.5h2.5a3.5 3.5 0 0 0 3.5-3.5V7.5c0-.1-.033-.191-.088-.266z"/>
-        </svg>
+        <!-- Aquí llamamos a tu imagen mano.webp -->
+        <img src="mano.webp" alt="Tocar pantalla" class="icono-manita">
     </div>
 
     <div class="contenedor-revista">
