@@ -57,7 +57,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: rgba(255, 255, 255, 0.85);
+            /* Color blanco levemente translúcido */
+            color: rgba(255, 255, 255, 0.85); 
             
             /* Empieza oculto */
             opacity: 0; 
@@ -72,10 +73,10 @@
         }
 
         .icono-manita {
-            width: 65px; /* Ancho fijo */
-            height: auto; /* Alto automático para no aplastarse */
+            width: 75px; /* Un tamaño un poco más grande y claro */
+            height: auto; 
             animation: latido 1.5s infinite ease-in-out; 
-            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.3));
         }
 
         @keyframes latido {
@@ -88,13 +89,11 @@
 </head>
 <body>
 
+    <!-- Animación flotante de la manita -->
     <div id="indicador-toque">
-        <svg class="icono-manita" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M10 13V5a2 2 0 1 1 4 0v6.5"></path>
-            <path d="M14 11.5h1.5a2.5 2.5 0 0 1 2.5 2.5v2a5 5 0 0 1-5 5h-2a5 5 0 0 1-5-5V13a2 2 0 0 1 2-2h2"></path>
-            <path d="M12 2v1"></path>
-            <path d="M16 4l-1 1"></path>
-            <path d="M8 4l1 1"></path>
+        <!-- SVG de mano detallado, inconfundible y profesional -->
+        <svg class="icono-manita" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M6.75 1a.75.75 0 0 1 .75.75V8a.5.5 0 0 0 1 0V5.467l.086-.004c.316-.014.618-.061.914-.1432A.492.492 0 0 1 10.5 5.5v1.84a.5.5 0 0 0 1 0V6.5c0-.276.224-.5.5-.5s.5.224.5.5v1.34a.5.5 0 0 0 1 0V7.5c0-.276.224-.5.5-.5s.5.224.5.5v5.5a4.5 4.5 0 0 1-4.5 4.5h-2.5a4.5 4.5 0 0 1-4.5-4.5V3a.5.5 0 0 1 .5-.5h.5V1.75a.75.75 0 0 1 .75-.75M11.5 7.221A1.5 1.5 0 0 0 10.5 6.5v-.5a1.5 1.5 0 0 0-1-1.415V2.5a1.5 1.5 0 0 0-3 0v6.177a1.5 1.5 0 0 0-.616-.251l-.382-.038C4.542 8.303 4 8.784 4 9.38v4.12a3.5 3.5 0 0 0 3.5 3.5h2.5a3.5 3.5 0 0 0 3.5-3.5V7.5c0-.1-.033-.191-.088-.266z"/>
         </svg>
     </div>
 
@@ -145,7 +144,7 @@
                 // Forzamos la opacidad a 0 para que se desvanezca
                 indicador.style.opacity = '0';
                 
-                // Lo eliminamos del DOM tras la transición (800ms)
+                // Lo eliminamos del DOM tras la transición
                 setTimeout(function() {
                     indicador.remove();
                 }, 800);
