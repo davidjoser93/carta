@@ -270,30 +270,7 @@
         btnPrev.addEventListener('click', fotoAnterior);
         btnNext.addEventListener('click', fotoSiguiente);
 
-        // 6. Swipe en pantallas táctiles
-        let touchStartX = 0;
-        let touchEndX = 0;
-        const umbralSwipe = 50;
-
-        function procesarSwipe() {
-            const distancia = touchEndX - touchStartX;
-            if (distancia > umbralSwipe) {
-                fotoAnterior(); 
-            } else if (distancia < -umbralSwipe) {
-                fotoSiguiente(); 
-            }
-        }
-
-        document.addEventListener('touchstart', e => {
-            touchStartX = e.changedTouches[0].screenX;
-        });
-
-        document.addEventListener('touchend', e => {
-            touchEndX = e.changedTouches[0].screenX;
-            procesarSwipe();
-        });
-
-        // 7. Soporte para teclado
+        // 6. Soporte para teclado
         document.addEventListener('keydown', (e) => {
             if(e.key === 'ArrowLeft') {
                 fotoAnterior();
