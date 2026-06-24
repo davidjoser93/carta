@@ -161,8 +161,8 @@
     </div>
 
     <script>
-        // 1. Configuración de Arrays
-        const totalFotos = 19;
+        // 1. Configuración de Arrays - ACTUALIZADO A 20 FOTOS
+        const totalFotos = 20; 
         const fotosFull = [];
         const fotosPreview = [];
 
@@ -199,7 +199,7 @@
             isPlaying = !isPlaying;
         });
 
-        // 3. Lógica para determinar el año
+        // 3. Lógica para determinar el año - ACTUALIZADO PARA 20 FOTOS
         function obtenerAnio(indice) {
             const numeroFoto = indice + 1; 
             
@@ -207,7 +207,8 @@
             if (numeroFoto >= 5 && numeroFoto <= 12) return "2023";
             if (numeroFoto === 13) return "2024";
             if (numeroFoto >= 14 && numeroFoto <= 17) return "2025";
-            if (numeroFoto >= 18 && numeroFoto <= 19) return "2026";
+            // La última foto (20) también es del 2026
+            if (numeroFoto >= 18 && numeroFoto <= 20) return "2026"; 
             
             return ""; 
         }
