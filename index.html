@@ -3,24 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diario - Modo Oscuro (Flechas Visibles y Clickables)</title>
-    <!-- 
-      Referencia visual: image_0.png muestra el estado anterior con flechas invisibles.
-      Este código corrige la visibilidad de las flechas de navegación lateral.
-    -->
+    <title>Aunque existan millones de rosas</title>
 
-    <!-- Enlaces a las hojas de estilo dFlip -->
     <link href="assets/css/dflip.min.css" rel="stylesheet" type="text/css">
     <link href="assets/css/themify-icons.min.css" rel="stylesheet" type="text/css">
 
     <style>
-        /* Estilos generales del cuerpo y contenedor */
         body, html {
             margin: 0;
             padding: 0;
             height: 100%;
             width: 100%;
-            /* Gris muy profundo para el fondo general, idéntico a la imagen */
+            /* Gris muy profundo para el fondo general */
             background-color: #121212; 
             overflow: hidden; 
         }
@@ -32,69 +26,24 @@
         }
 
         /* ==================================================
-           CORRECCIÓN DE VISIBILIDAD DE FLECHAS (SOLUCIÓN INFALIBLE)
+           PERSONALIZACIÓN DE INTERFAZ (SOLO FLECHAS LATERALES)
            ================================================== */
         
-        /* 1. Ocultar toda la barra de herramientas inferior (zoom, compartir, etc.) */
+        /* 1. Oculta toda la barra de herramientas inferior (zoom, compartir, etc.) */
         .df-ui-controls {
             display: none !important;
         }
 
-        /* 2. Dirigirse y estilar los botones de navegación lateral existentes */
-        /* Asegurar que sean visibles, de tamaño adecuado, circular y con fondo sutil */
-        .df-ui-next, .df-ui-prev {
-            display: flex !important; /* Usamos flex para centrado de flechas */
-            align-items: center !important;
-            justify-content: center !important;
+        /* 2. Oculta todos los botones de la interfaz por defecto */
+        .df-ui-btn {
+            display: none !important;
+        }
+        
+        /* 3. Fuerza a mostrar ÚNICAMENTE los botones de Siguiente y Anterior */
+        .df-ui-btn.df-ui-next,
+        .df-ui-btn.df-ui-prev {
+            display: flex !important; /* Usamos flex para que el ícono siga centrado */
             pointer-events: auto !important; /* Asegura que sean clickeables */
-            
-            /* Círculo de fondo semitransparente para que resalte y muestre el área táctil */
-            background-color: rgba(255, 255, 255, 0.15) !important;
-            border-radius: 50% !important;
-            width: 55px !important; /* Tamaño aumentado para facilidad de toque */
-            height: 55px !important;
-            
-            /* Ocultar cualquier texto/ícono incorporado que pueda fallar */
-            color: transparent !important;
-            text-indent: -9999px !important;
-            
-            /* Asegurar que no haya estilos heredados conflictivos */
-            margin: 0 !important;
-            padding: 0 !important;
-            border: none !important;
-            box-shadow: none !important;
-        }
-
-        /* Efecto al tocar/pasar el mouse por el botón circular */
-        .df-ui-next:hover, .df-ui-prev:hover {
-            background-color: rgba(255, 255, 255, 0.3) !important;
-        }
-
-        /* 3. Dibujar las flechas CSS puro con seudoelementos */
-        /* Esto garantiza que siempre se vean, incluso sin fuentes de íconos. */
-        .df-ui-next::before, .df-ui-prev::before {
-            content: '' !important;
-            display: block !important;
-            width: 16px !important; /* Un poco más grandes */
-            height: 16px !important;
-            border: solid #ffffff !important; /* Bordes blancos */
-            border-width: 4px 4px 0 0 !important; /* Superior y Derecha para flecha derecha */
-            
-            /* Asegurar que las reglas de dFlip no lo oculten */
-            visibility: visible !important;
-            opacity: 1 !important;
-        }
-
-        /* Flecha Siguiente (apunta a la derecha) */
-        .df-ui-next::before {
-            transform: rotate(45deg) !important;
-            margin-right: -4px; /* Ajuste para centrado visual en el círculo */
-        }
-
-        /* Flecha Anterior (apunta a la izquierda) */
-        .df-ui-prev::before {
-            transform: rotate(-135deg) !important;
-            margin-left: -4px; /* Ajuste para centrado visual en el círculo */
         }
 
     </style>
@@ -108,14 +57,9 @@
              option-webgl="false" 
              option-hard="cover"
              option-background-color="#121212">
-            <!-- Texto de muestra para coincidir con la imagen -->
-            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-family: sans-serif; font-size: 24px;">
-                Junio 2026
-            </div>
         </div>
     </div>
 
-    <!-- Enlaces a los scripts JS -->
     <script src="assets/js/jquery.min.js"></script>
 
     <script>
