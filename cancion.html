@@ -35,22 +35,20 @@
             overflow: hidden;
         }
 
-        /* Botón de descarga con efecto esmerilado */
+        /* Botón de descarga - Estilo plano/delineado sin efecto esmerilado */
         .download-btn {
             position: absolute;
             top: 24px;
             right: 24px;
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border);
+            background: transparent; /* Quitamos el fondo esmerilado */
+            border: 1px solid rgba(255, 255, 255, 0.25); /* Borde plano y limpio */
             border-radius: 50%;
             width: 50px;
             height: 50px;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             color: var(--text-main);
             text-decoration: none;
             transition: all 0.3s ease;
@@ -66,9 +64,8 @@
         }
 
         .download-btn:hover {
-            background: var(--glass-bg-hover);
-            border-color: rgba(255, 255, 255, 0.25);
-            /* Mantenemos el translateZ(0) durante el hover para evitar que pierda la capa acelerada */
+            background: rgba(255, 255, 255, 0.1); /* Fondo sutil sin blur en hover */
+            border-color: var(--accent-color);
             transform: translateY(-2px) translateZ(0);
             -webkit-transform: translateY(-2px) translateZ(0);
             color: var(--accent-color);
@@ -176,7 +173,6 @@
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             
-            /* Prevención preventiva de parpadeo para este botón también */
             transform: translateZ(0);
             -webkit-transform: translateZ(0);
             backface-visibility: hidden;
