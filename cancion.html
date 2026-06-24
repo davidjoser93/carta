@@ -56,12 +56,21 @@
             transition: all 0.3s ease;
             cursor: pointer;
             z-index: 10;
+            
+            /* Corrección del parpadeo (Flicker Fix) */
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            will-change: transform;
         }
 
         .download-btn:hover {
             background: var(--glass-bg-hover);
             border-color: rgba(255, 255, 255, 0.25);
-            transform: translateY(-2px);
+            /* Mantenemos el translateZ(0) durante el hover para evitar que pierda la capa acelerada */
+            transform: translateY(-2px) translateZ(0);
+            -webkit-transform: translateY(-2px) translateZ(0);
             color: var(--accent-color);
         }
 
@@ -84,12 +93,12 @@
         .cover {
             width: 260px;
             height: 260px;
-            object-fit: cover; /* Asegura que el video llene el cuadrado sin deformarse */
+            object-fit: cover;
             border-radius: 20px;
             box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
             margin-bottom: 28px;
             border: 1px solid rgba(255, 255, 255, 0.05);
-            background-color: #000; /* Fondo negro por si el video tarda en cargar */
+            background-color: #000;
         }
 
         .title {
@@ -166,17 +175,25 @@
             cursor: pointer;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            
+            /* Prevención preventiva de parpadeo para este botón también */
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
 
         .play-pause-btn:hover {
             background: rgba(255, 255, 255, 0.18);
             border-color: rgba(255, 255, 255, 0.3);
-            transform: scale(1.06);
+            transform: scale(1.06) translateZ(0);
+            -webkit-transform: scale(1.06) translateZ(0);
             box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
         }
         
         .play-pause-btn:active {
-            transform: scale(0.98);
+            transform: scale(0.98) translateZ(0);
+            -webkit-transform: scale(0.98) translateZ(0);
         }
 
         /* Estilo para los iconos internos */
@@ -219,7 +236,6 @@
     </div>
 
     <script>
-        // Actualizamos la variable para apuntar al reproductor de video
         const video = document.getElementById('video-player');
         const playPauseBtn = document.getElementById('play-pause-btn');
         const playIcon = document.getElementById('play-icon');
@@ -228,7 +244,6 @@
         const currentTimeEl = document.getElementById('current-time');
         const durationEl = document.getElementById('duration');
 
-        // Formateador de tiempo (mm:ss)
         function formatTime(seconds) {
             if (isNaN(seconds)) return "0:00";
             const min = Math.floor(seconds / 60);
@@ -236,7 +251,6 @@
             return `${min}:${sec < 10 ? '0' : ''}${sec}`;
         }
 
-        // Alternar estados Play/Pause en el video
         playPauseBtn.addEventListener('click', () => {
             if (video.paused) {
                 video.play();
@@ -249,7 +263,6 @@
             }
         });
 
-        // Sincronizar la barra deslizante con el avance real del video
         video.addEventListener('timeupdate', () => {
             if (!video.duration) return;
             const progress = (video.currentTime / video.duration) * 100;
@@ -257,18 +270,15 @@
             currentTimeEl.textContent = formatTime(video.currentTime);
         });
 
-        // Capturar metadatos del archivo para mostrar la duración exacta al cargar
         video.addEventListener('loadedmetadata', () => {
             durationEl.textContent = formatTime(video.duration);
         });
 
-        // Permitir al usuario saltar a cualquier punto del video
         progressBar.addEventListener('input', () => {
             const seekTime = (progressBar.value / 100) * video.duration;
             video.currentTime = seekTime;
         });
 
-        // Comportamiento al finalizar la reproducción de la pista
         video.addEventListener('ended', () => {
             playIcon.style.display = 'block';
             pauseIcon.style.display = 'none';
