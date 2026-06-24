@@ -80,15 +80,16 @@
             transition: transform 0.3s ease;
         }
 
-        /* Carátula */
+        /* Video / Carátula */
         .cover {
             width: 260px;
             height: 260px;
-            object-fit: cover;
+            object-fit: cover; /* Asegura que el video llene el cuadrado sin deformarse */
             border-radius: 20px;
             box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
             margin-bottom: 28px;
             border: 1px solid rgba(255, 255, 255, 0.05);
+            background-color: #000; /* Fondo negro por si el video tarda en cargar */
         }
 
         .title {
@@ -97,7 +98,7 @@
             margin-bottom: 28px;
             letter-spacing: -0.5px;
             color: var(--text-main);
-            line-height: 1.4; /* Ajuste opcional para mejorar el espaciado entre las dos líneas */
+            line-height: 1.4;
         }
 
         /* Contenedor de la barra de tiempo */
@@ -195,11 +196,9 @@
     </a>
 
     <div class="player-card">
-        <img src="Images.jpeg" alt="Carátula" class="cover">
+        <video id="video-player" src="Aunque existan millones de rosas.mp4" class="cover" playsinline></video>
         
         <h2 class="title">Aunque existan<br>millones de rosas</h2>
-        
-        <audio id="audio-player" src="Aunque existan millones de rosas.mp3"></audio>
 
         <div class="progress-container">
             <span id="current-time">0:00</span>
@@ -220,7 +219,8 @@
     </div>
 
     <script>
-        const audio = document.getElementById('audio-player');
+        // Actualizamos la variable para apuntar al reproductor de video
+        const video = document.getElementById('video-player');
         const playPauseBtn = document.getElementById('play-pause-btn');
         const playIcon = document.getElementById('play-icon');
         const pauseIcon = document.getElementById('pause-icon');
@@ -236,40 +236,40 @@
             return `${min}:${sec < 10 ? '0' : ''}${sec}`;
         }
 
-        // Alternar estados Play/Pause
+        // Alternar estados Play/Pause en el video
         playPauseBtn.addEventListener('click', () => {
-            if (audio.paused) {
-                audio.play();
+            if (video.paused) {
+                video.play();
                 playIcon.style.display = 'none';
                 pauseIcon.style.display = 'block';
             } else {
-                audio.pause();
+                video.pause();
                 playIcon.style.display = 'block';
                 pauseIcon.style.display = 'none';
             }
         });
 
-        // Sincronizar la barra deslizante con el avance real del audio
-        audio.addEventListener('timeupdate', () => {
-            if (!audio.duration) return;
-            const progress = (audio.currentTime / audio.duration) * 100;
+        // Sincronizar la barra deslizante con el avance real del video
+        video.addEventListener('timeupdate', () => {
+            if (!video.duration) return;
+            const progress = (video.currentTime / video.duration) * 100;
             progressBar.value = progress;
-            currentTimeEl.textContent = formatTime(audio.currentTime);
+            currentTimeEl.textContent = formatTime(video.currentTime);
         });
 
         // Capturar metadatos del archivo para mostrar la duración exacta al cargar
-        audio.addEventListener('loadedmetadata', () => {
-            durationEl.textContent = formatTime(audio.duration);
+        video.addEventListener('loadedmetadata', () => {
+            durationEl.textContent = formatTime(video.duration);
         });
 
-        // Permitir al usuario saltar a cualquier punto de la canción
+        // Permitir al usuario saltar a cualquier punto del video
         progressBar.addEventListener('input', () => {
-            const seekTime = (progressBar.value / 100) * audio.duration;
-            audio.currentTime = seekTime;
+            const seekTime = (progressBar.value / 100) * video.duration;
+            video.currentTime = seekTime;
         });
 
         // Comportamiento al finalizar la reproducción de la pista
-        audio.addEventListener('ended', () => {
+        video.addEventListener('ended', () => {
             playIcon.style.display = 'block';
             pauseIcon.style.display = 'none';
             progressBar.value = 0;
