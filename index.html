@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diario - Modo Oscuro Total (Sin Botones)</title>
+    <title>Aunque existan millones de rosas</title>
 
     <link href="assets/css/dflip.min.css" rel="stylesheet" type="text/css">
     <link href="assets/css/themify-icons.min.css" rel="stylesheet" type="text/css">
@@ -26,22 +26,24 @@
         }
 
         /* ==================================================
-           OCULTAR INTERFAZ DE USUARIO (SIN BOTONES)
+           PERSONALIZACIÓN DE INTERFAZ (SOLO FLECHAS LATERALES)
            ================================================== */
         
-        /* Oculta la barra de herramientas inferior */
+        /* 1. Oculta toda la barra de herramientas inferior (zoom, compartir, etc.) */
         .df-ui-controls {
             display: none !important;
         }
 
-        /* Oculta las flechas laterales (Siguiente / Anterior) */
+        /* 2. Oculta todos los botones de la interfaz por defecto */
         .df-ui-btn {
             display: none !important;
         }
         
-        /* Asegura que la capa invisible de la UI no estorbe los gestos táctiles */
-        .df-ui {
-            pointer-events: none !important;
+        /* 3. Fuerza a mostrar ÚNICAMENTE los botones de Siguiente y Anterior */
+        .df-ui-btn.df-ui-next,
+        .df-ui-btn.df-ui-prev {
+            display: flex !important; /* Usamos flex para que el ícono siga centrado */
+            pointer-events: auto !important; /* Asegura que sean clickeables */
         }
 
     </style>
