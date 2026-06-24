@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visor de Galería Minimalista</title>
+    <title>Visor de Fotos</title>
     <style>
         /* Reseteo y fondo minimalista oscuro */
         * {
@@ -40,22 +40,6 @@
             opacity: 0;
         }
 
-        /* Pantalla de carga (Transparente para los previews rápidos) */
-        .pantalla-carga {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 5;
-            opacity: 0;
-            pointer-events: none;
-            /* La mantenemos en el código pero invisible para no estorbar visualmente */
-        }
-
         /* Estilos base para botones flotantes */
         .btn-flotante {
             background-color: rgba(255, 255, 255, 0.05);
@@ -89,12 +73,26 @@
             pointer-events: none;
         }
 
-        /* Botón de descarga */
+        /* Botón de descarga (Esquina superior derecha) */
         .btn-descarga {
             position: absolute;
             top: 24px;
             right: 24px;
             z-index: 10;
+        }
+
+        /* Botón de música (Esquina superior izquierda) */
+        .btn-audio {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            z-index: 10;
+        }
+
+        /* Estado activo para el botón de música */
+        .btn-audio.activo {
+            background-color: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.4);
         }
 
         /* Controles de navegación inferiores */
@@ -104,7 +102,7 @@
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            align-items: center; /* Alinea verticalmente flechas y texto */
+            align-items: center;
             gap: 24px;
             z-index: 10;
         }
@@ -115,13 +113,24 @@
             font-size: 1.1rem;
             font-weight: 300;
             letter-spacing: 2px;
-            width: 60px; /* Ancho fijo para que las flechas no se muevan de lugar */
+            width: 60px;
             text-align: center;
             user-select: none;
         }
     </style>
 </head>
 <body>
+
+    <audio id="bg-audio" loop>
+        <source src="Aunque existan millones de rosas instrumental.mp3" type="audio/mpeg">
+    </audio>
+
+    <button id="btn-audio" class="btn-flotante btn-audio" title="Reproducir/Pausar música">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+            <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+        </svg>
+    </button>
 
     <a id="btn-descarga" href="#" download class="btn-flotante btn-descarga" title="Descargar foto en alta resolución">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -152,15 +161,15 @@
     </div>
 
     <script>
-        // 1. Configuración de Arrays (Previews vs Full Size)
+        // 1. Configuración de Arrays
         const totalFotos = 19;
         const fotosFull = [];
         const fotosPreview = [];
 
         for (let i = 1; i <= totalFotos; i++) {
             const numeroFormateado = String(i).padStart(2, '0');
-            fotosFull.push(numeroFormateado + '.jpg');             // Ejemplo: 01.jpg
-            fotosPreview.push(numeroFormateado + 'preview.jpg');   // Ejemplo: 01preview.jpg
+            fotosFull.push(numeroFormateado + '.jpg');             
+            fotosPreview.push(numeroFormateado + 'preview.jpg');   
         }
 
         let indiceActual = 0;
@@ -172,10 +181,27 @@
         const btnPrev = document.getElementById('btn-prev');
         const btnNext = document.getElementById('btn-next');
         const labelAnio = document.getElementById('label-anio');
+        
+        // Elementos de Audio
+        const btnAudio = document.getElementById('btn-audio');
+        const bgAudio = document.getElementById('bg-audio');
+        let isPlaying = false;
 
-        // 2. Lógica para determinar el año según el índice de la foto
+        // 2. Lógica de Audio
+        btnAudio.addEventListener('click', () => {
+            if (isPlaying) {
+                bgAudio.pause();
+                btnAudio.classList.remove('activo');
+            } else {
+                bgAudio.play();
+                btnAudio.classList.add('activo');
+            }
+            isPlaying = !isPlaying;
+        });
+
+        // 3. Lógica para determinar el año
         function obtenerAnio(indice) {
-            const numeroFoto = indice + 1; // Convertimos de índice (0-18) a número real (1-19)
+            const numeroFoto = indice + 1; 
             
             if (numeroFoto >= 1 && numeroFoto <= 4) return "2022";
             if (numeroFoto >= 5 && numeroFoto <= 12) return "2023";
@@ -183,16 +209,15 @@
             if (numeroFoto >= 14 && numeroFoto <= 17) return "2025";
             if (numeroFoto >= 18 && numeroFoto <= 19) return "2026";
             
-            return ""; // Por defecto, por si acaso
+            return ""; 
         }
 
-        // 3. Función principal de actualización visual
+        // 4. Función principal de actualización visual
         function actualizarVisor() {
             const archivoPreview = fotosPreview[indiceActual];
             const archivoFull = fotosFull[indiceActual];
             const idActual = ++idPeticionCarga;
             
-            // Ocultar/mostrar botones en los límites
             if (indiceActual === 0) {
                 btnPrev.classList.add('btn-oculto');
             } else {
@@ -205,17 +230,13 @@
                 btnNext.classList.remove('btn-oculto');
             }
 
-            // Actualizar el texto del año
             labelAnio.innerText = obtenerAnio(indiceActual);
             
-            // Efecto suave de transición de imagen
             imgElement.style.opacity = 0;
             
-            // Configurar el botón de descarga para que apunte a la imagen pesada
             btnDescarga.href = archivoFull;
             btnDescarga.setAttribute('download', archivoFull);
 
-            // Cargar el preview ligero en el visor
             imgElement.onload = () => {
                 if (idActual === idPeticionCarga) {
                     imgElement.style.opacity = 1;
@@ -228,11 +249,10 @@
                 }
             };
 
-            // Disparamos la carga de la miniatura
             imgElement.src = archivoPreview; 
         }
 
-        // 4. Funciones de Navegación (con límites cerrados)
+        // 5. Funciones de Navegación
         function fotoSiguiente() {
             if (indiceActual < totalFotos - 1) {
                 indiceActual++;
@@ -247,11 +267,10 @@
             }
         }
 
-        // Eventos en botones
         btnPrev.addEventListener('click', fotoAnterior);
         btnNext.addEventListener('click', fotoSiguiente);
 
-        // 5. Swipe en pantallas táctiles
+        // 6. Swipe en pantallas táctiles
         let touchStartX = 0;
         let touchEndX = 0;
         const umbralSwipe = 50;
@@ -259,9 +278,9 @@
         function procesarSwipe() {
             const distancia = touchEndX - touchStartX;
             if (distancia > umbralSwipe) {
-                fotoAnterior(); // Deslizar derecha
+                fotoAnterior(); 
             } else if (distancia < -umbralSwipe) {
-                fotoSiguiente(); // Deslizar izquierda
+                fotoSiguiente(); 
             }
         }
 
@@ -274,7 +293,7 @@
             procesarSwipe();
         });
 
-        // 6. Soporte para teclado
+        // 7. Soporte para teclado
         document.addEventListener('keydown', (e) => {
             if(e.key === 'ArrowLeft') {
                 fotoAnterior();
