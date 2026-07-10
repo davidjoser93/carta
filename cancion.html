@@ -35,13 +35,20 @@
             overflow: hidden;
         }
 
-        /* Botón de descarga - Estilo plano/delineado sin efecto esmerilado */
-        .download-btn {
+        /* Contenedor para los botones superiores */
+        .top-actions-container {
             position: absolute;
             top: 24px;
             right: 24px;
-            background: transparent; /* Quitamos el fondo esmerilado */
-            border: 1px solid rgba(255, 255, 255, 0.25); /* Borde plano y limpio */
+            display: flex;
+            gap: 12px; /* Separación entre los botones */
+            z-index: 10;
+        }
+
+        /* Estilos compartidos para los botones de acción superior */
+        .action-btn {
+            background: transparent; 
+            border: 1px solid rgba(255, 255, 255, 0.25); 
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -53,7 +60,6 @@
             text-decoration: none;
             transition: all 0.3s ease;
             cursor: pointer;
-            z-index: 10;
             
             /* Corrección del parpadeo (Flicker Fix) */
             transform: translateZ(0);
@@ -63,8 +69,8 @@
             will-change: transform;
         }
 
-        .download-btn:hover {
-            background: rgba(255, 255, 255, 0.1); /* Fondo sutil sin blur en hover */
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.1); 
             border-color: var(--accent-color);
             transform: translateY(-2px) translateZ(0);
             -webkit-transform: translateY(-2px) translateZ(0);
@@ -200,13 +206,35 @@
 </head>
 <body>
 
-    <a href="Aunque existan millones de rosas.mp3" download class="download-btn" title="Descargar MP3">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-        </svg>
-    </a>
+    <div class="top-actions-container">
+        
+        <a href="https://davidjoser93.github.io/carta/" class="action-btn" title="Ir a la Carta">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+        </a>
+
+        <a href="https://davidjoser93.github.io/carta/fotos" class="action-btn" title="Ver Fotos">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+        </a>
+
+        <a href="Aunque existan millones de rosas.mp3" download class="action-btn" title="Descargar MP3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+        </a>
+
+    </div>
 
     <div class="player-card">
         <video id="video-player" src="Aunque existan millones de rosas.mp4" class="cover" playsinline></video>
