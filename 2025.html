@@ -165,15 +165,16 @@
 
     <script>
         // 1. Configuración de Arrays y Canciones
-        const totalFotos = 25; 
+        const totalFotos = 24; // Cambiado a 24 para quitar la última imagen
         const fotosFull = [];
         const fotosPreview = [];
         
         // Diccionario que vincula el índice de la foto con su respectiva canción
-        // Índice 5 = foto 0006 | Índice 17 = foto 0018
+        // Índice 5 = foto 0006 | Índice 17 = foto 0018 | Índice 23 = foto 0024 (la nueva última foto)
         const canciones = {
             5: "Dorado y Mate.mp3",
-            17: "Instante Eterno.mp3"
+            17: "Instante Eterno.mp3",
+            23: "Instante Eterno Instrumental.mp3" // Añadida la canción para la nueva última foto
         };
 
         for (let i = 1; i <= totalFotos; i++) {
