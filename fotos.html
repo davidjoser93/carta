@@ -93,7 +93,7 @@
         .btn-descarga-audio {
             position: absolute;
             top: 24px;
-            left: 90px; /* 24px(left) + 50px(ancho del botón) + 16px(margen) */
+            left: 90px;
             z-index: 10;
         }
 
@@ -150,7 +150,7 @@
     </a>
 
     <!-- Control superior derecho (Descarga de foto) -->
-    <a id="btn-descarga" href="#" download class="btn-flotante btn-descarga" title="Descargar foto en alta resolución">
+    <a id="btn-descarga" href="#" class="btn-flotante btn-descarga" title="Descargar foto en alta resolución">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="7 10 12 15 17 10"></polyline>
@@ -187,13 +187,12 @@
 
         // Recorremos hasta el 20, pero nos saltamos el número 4
         for (let i = 1; i <= 20; i++) {
-            if (i === 4) continue; // Omite el 04.jpg y 04preview.jpg
+            if (i === 4) continue; 
             
             const numeroFormateado = String(i).padStart(2, '0');
             fotosFull.push(numeroFormateado + '.jpg');             
             fotosPreview.push(numeroFormateado + 'preview.jpg');   
         }
-        // El array ahora contiene: ["01.jpg", "02.jpg", "03.jpg", "05.jpg", "06.jpg" ... "20.jpg"]
 
         let indiceActual = 0;
         let idPeticionCarga = 0;
@@ -224,13 +223,13 @@
 
         // 3. Lógica para determinar el año basada en la POSICIÓN (1 a 19)
         function obtenerAnio(indice) {
-            const posicionFoto = indice + 1; // Posición en el array, del 1 al 19
+            const posicionFoto = indice + 1; 
             
-            if (posicionFoto >= 1 && posicionFoto <= 3) return "2022";   // Posiciones 1 a 3 (Archivos 01, 02, 03)
-            if (posicionFoto >= 4 && posicionFoto <= 11) return "2023";  // Posiciones 4 a 11 (Archivos 05 al 12)
-            if (posicionFoto === 12) return "2024";                      // Posición 12 (Archivo 13)
-            if (posicionFoto >= 13 && posicionFoto <= 16) return "2025"; // Posiciones 13 a 16 (Archivos 14 al 17)
-            if (posicionFoto >= 17 && posicionFoto <= 19) return "2026"; // Posiciones 17 a 19 (Archivos 18 al 20)
+            if (posicionFoto >= 1 && posicionFoto <= 3) return "2022";   
+            if (posicionFoto >= 4 && posicionFoto <= 11) return "2023";  
+            if (posicionFoto === 12) return "2024";                      
+            if (posicionFoto >= 13 && posicionFoto <= 16) return "2025"; 
+            if (posicionFoto >= 17 && posicionFoto <= 19) return "2026"; 
             
             return ""; 
         }
@@ -257,8 +256,13 @@
             
             imgElement.style.opacity = 0;
             
+            // Lógica de descarga
             btnDescarga.href = archivoFull;
-            btnDescarga.setAttribute('download', archivoFull);
+            
+            // Creamos el nombre secuencial para la descarga forzando que vaya de 01 a 19
+            const numeroSecuencial = String(indiceActual + 1).padStart(2, '0');
+            const nombreDeDescarga = numeroSecuencial + '.jpg';
+            btnDescarga.setAttribute('download', nombreDeDescarga);
 
             imgElement.onload = () => {
                 if (idActual === idPeticionCarga) {
