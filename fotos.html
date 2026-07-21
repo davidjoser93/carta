@@ -180,16 +180,20 @@
     </div>
 
     <script>
-        // 1. Configuración de Arrays - ACTUALIZADO A 19 FOTOS
+        // 1. Configuración de Arrays - 19 FOTOS (saltando la original 04)
         const totalFotos = 19; 
         const fotosFull = [];
         const fotosPreview = [];
 
-        for (let i = 1; i <= totalFotos; i++) {
+        // Recorremos hasta el 20, pero nos saltamos el número 4
+        for (let i = 1; i <= 20; i++) {
+            if (i === 4) continue; // Omite el 04.jpg y 04preview.jpg
+            
             const numeroFormateado = String(i).padStart(2, '0');
             fotosFull.push(numeroFormateado + '.jpg');             
             fotosPreview.push(numeroFormateado + 'preview.jpg');   
         }
+        // El array ahora contiene: ["01.jpg", "02.jpg", "03.jpg", "05.jpg", "06.jpg" ... "20.jpg"]
 
         let indiceActual = 0;
         let idPeticionCarga = 0;
@@ -218,15 +222,15 @@
             isPlaying = !isPlaying;
         });
 
-        // 3. Lógica para determinar el año - ACTUALIZADO (2022 ahora tiene 3 fotos)
+        // 3. Lógica para determinar el año basada en la POSICIÓN (1 a 19)
         function obtenerAnio(indice) {
-            const numeroFoto = indice + 1; 
+            const posicionFoto = indice + 1; // Posición en el array, del 1 al 19
             
-            if (numeroFoto >= 1 && numeroFoto <= 3) return "2022";   // 3 fotos
-            if (numeroFoto >= 4 && numeroFoto <= 11) return "2023";  // 8 fotos
-            if (numeroFoto === 12) return "2024";                    // 1 foto
-            if (numeroFoto >= 13 && numeroFoto <= 16) return "2025"; // 4 fotos
-            if (numeroFoto >= 17 && numeroFoto <= 19) return "2026"; // 3 fotos
+            if (posicionFoto >= 1 && posicionFoto <= 3) return "2022";   // Posiciones 1 a 3 (Archivos 01, 02, 03)
+            if (posicionFoto >= 4 && posicionFoto <= 11) return "2023";  // Posiciones 4 a 11 (Archivos 05 al 12)
+            if (posicionFoto === 12) return "2024";                      // Posición 12 (Archivo 13)
+            if (posicionFoto >= 13 && posicionFoto <= 16) return "2025"; // Posiciones 13 a 16 (Archivos 14 al 17)
+            if (posicionFoto >= 17 && posicionFoto <= 19) return "2026"; // Posiciones 17 a 19 (Archivos 18 al 20)
             
             return ""; 
         }
