@@ -73,7 +73,7 @@
             pointer-events: none;
         }
 
-        /* Botón de descarga (Esquina superior derecha) */
+        /* Botón de descarga de imagen (Esquina superior derecha) */
         .btn-descarga {
             position: absolute;
             top: 24px;
@@ -86,6 +86,14 @@
             position: absolute;
             top: 24px;
             left: 24px;
+            z-index: 10;
+        }
+
+        /* Botón de descarga de música (Junto al botón de música) */
+        .btn-descarga-audio {
+            position: absolute;
+            top: 24px;
+            left: 90px; /* 24px(left) + 50px(ancho del botón) + 16px(margen) */
             z-index: 10;
         }
 
@@ -125,6 +133,7 @@
         <source src="Aunque existan millones de rosas instrumental.mp3" type="audio/mpeg">
     </audio>
 
+    <!-- Controles superiores izquierdos (Audio) -->
     <button id="btn-audio" class="btn-flotante btn-audio" title="Reproducir/Pausar música">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
@@ -132,6 +141,15 @@
         </svg>
     </button>
 
+    <a href="Aunque existan millones de rosas instrumental.mp3" download="Aunque existan millones de rosas instrumental.mp3" class="btn-flotante btn-descarga-audio" title="Descargar música de fondo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+    </a>
+
+    <!-- Control superior derecho (Descarga de foto) -->
     <a id="btn-descarga" href="#" download class="btn-flotante btn-descarga" title="Descargar foto en alta resolución">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -140,6 +158,7 @@
         </svg>
     </a>
 
+    <!-- Controles inferiores -->
     <div class="nav-container">
         <button id="btn-prev" class="btn-flotante btn-oculto" title="Foto anterior">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -161,8 +180,8 @@
     </div>
 
     <script>
-        // 1. Configuración de Arrays - ACTUALIZADO A 20 FOTOS
-        const totalFotos = 20; 
+        // 1. Configuración de Arrays - ACTUALIZADO A 19 FOTOS
+        const totalFotos = 19; 
         const fotosFull = [];
         const fotosPreview = [];
 
@@ -199,16 +218,15 @@
             isPlaying = !isPlaying;
         });
 
-        // 3. Lógica para determinar el año - ACTUALIZADO PARA 20 FOTOS
+        // 3. Lógica para determinar el año - ACTUALIZADO (2022 ahora tiene 3 fotos)
         function obtenerAnio(indice) {
             const numeroFoto = indice + 1; 
             
-            if (numeroFoto >= 1 && numeroFoto <= 4) return "2022";
-            if (numeroFoto >= 5 && numeroFoto <= 12) return "2023";
-            if (numeroFoto === 13) return "2024";
-            if (numeroFoto >= 14 && numeroFoto <= 17) return "2025";
-            // La última foto (20) también es del 2026
-            if (numeroFoto >= 18 && numeroFoto <= 20) return "2026"; 
+            if (numeroFoto >= 1 && numeroFoto <= 3) return "2022";   // 3 fotos
+            if (numeroFoto >= 4 && numeroFoto <= 11) return "2023";  // 8 fotos
+            if (numeroFoto === 12) return "2024";                    // 1 foto
+            if (numeroFoto >= 13 && numeroFoto <= 16) return "2025"; // 4 fotos
+            if (numeroFoto >= 17 && numeroFoto <= 19) return "2026"; // 3 fotos
             
             return ""; 
         }
