@@ -388,6 +388,7 @@
              source="carta.pdf" 
              option-webgl="false" 
              option-hard="cover"
+             option-sound="true"
              option-background-color="#121212">
         </div>
     </div>
@@ -402,9 +403,61 @@
 
     <script>
         // ==================================================
+        // INTERCEPTOR GLOBAL DE SONIDO PARA DFLIP Y DESBLOQUEO
+        // ==================================================
+        const audioNarracion = document.getElementById('audio-narracion');
+        
+        // Esta variable indica si el reproductor inferior está abierto (modo narración activo)
+        let modoNarracionActivo = false;
+
+        // 1. Interceptamos HTMLMediaElement.prototype.play porque dFlip crea un objeto
+        //    "new Audio()" en memoria (fuera del DOM) para el sonido de pasar las páginas.
+        const playNativo = HTMLMediaElement.prototype.play;
+        HTMLMediaElement.prototype.play = function() {
+            // Si el sonido que intenta sonar NO es el de la narración:
+            if (this !== audioNarracion) {
+                if (modoNarracionActivo) {
+                    // Si estamos en modo narración, bloqueamos y silenciamos el flip
+                    this.muted = true;
+                    return Promise.resolve();
+                } else {
+                    // Si NO estamos en modo narración, nos aseguramos de que el flip suene
+                    this.muted = false;
+                }
+            }
+            return playNativo.apply(this, arguments);
+        };
+
+        // 2. Sincronizar también con el botón/estado interno de sonido de dFlip
+        function sincronizarSonidoDFlip(habilitar) {
+            const btnSonidoDFlip = document.querySelector('.df-ui-sound');
+            if (btnSonidoDFlip) {
+                if (habilitar) {
+                    btnSonidoDFlip.classList.add('df-active');
+                } else {
+                    btnSonidoDFlip.classList.remove('df-active');
+                }
+            }
+        }
+
+        // 3. Los navegadores bloquean el sonido al recién cargar hasta que haya un gesto del usuario.
+        //    Con este listener, al primer toque en la pantalla desbloqueamos el motor de audio
+        //    para que el primer flip de página ya suene de inmediato.
+        function desbloquearAudioInicial() {
+            if (!modoNarracionActivo) {
+                sincronizarSonidoDFlip(true);
+            }
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) {
+                const ctx = new AudioCtx();
+                ctx.resume().then(() => ctx.close());
+            }
+        }
+        document.addEventListener('pointerdown', desbloquearAudioInicial, { once: true, capture: true });
+
+        // ==================================================
         // LÓGICA DE APARICIÓN Y DESAPARICIÓN DE LA MANITA
         // ==================================================
-        
         let usuarioYaToco = false;
 
         window.addEventListener('load', function() {
@@ -435,7 +488,6 @@
         // ==================================================
         const btnToggleNarracion = document.getElementById('btn-toggle-narracion');
         const reproductor = document.getElementById('reproductor-narracion');
-        const audioNarracion = document.getElementById('audio-narracion');
         const btnPlayPause = document.getElementById('btn-play-pause');
         const iconPlay = document.getElementById('icon-play');
         const iconPause = document.getElementById('icon-pause');
@@ -453,54 +505,27 @@
             return `${min}:${sec < 10 ? '0' : ''}${sec}`;
         }
 
-        // Controlar el sonido de pasar página de dFlip
-        function configurarSonidoRevista(permitirSonido) {
-            // 1. Cambiar la opción en la instancia activa de dFlip (jQuery data o variable global)
-            if (window.jQuery) {
-                const libroEl = jQuery('#mi_revista');
-                if (libroEl.length && libroEl.data('dflip')) {
-                    libroEl.data('dflip').options.sound = permitirSonido;
-                }
-            }
-            if (window.df_mi_revista && window.df_mi_revista.options) {
-                window.df_mi_revista.options.sound = permitirSonido;
-            }
-            if (window.DFLIP && window.DFLIP.defaults) {
-                window.DFLIP.defaults.sound = permitirSonido;
-            }
-
-            // 2. Silenciar cualquier elemento <audio> adicional que dFlip cree para el efecto de página
-            document.querySelectorAll('audio').forEach(audioEl => {
-                if (audioEl !== audioNarracion) {
-                    audioEl.muted = !permitirSonido;
-                }
-            });
-        }
-
-        // Interceptar cualquier audio nuevo que dFlip intente reproducir mientras la narración está activa
-        document.addEventListener('play', function(e) {
-            if (e.target !== audioNarracion && !audioNarracion.paused) {
-                e.target.muted = true;
-                e.target.pause();
-            }
-        }, true);
-
         function actualizarIconosPlay(reproduciendo) {
             if (reproduciendo) {
                 iconPlay.style.display = 'none';
                 iconPause.style.display = 'block';
-                configurarSonidoRevista(false); // Desactivar sonido de pasar página
             } else {
                 iconPlay.style.display = 'block';
                 iconPause.style.display = 'none';
-                configurarSonidoRevista(true); // Restaurar sonido de pasar página
             }
         }
 
-        // Al tocar "Narrar el PDF": ocultar el botón, mostrar el reproductor y reproducir
+        // Al tocar "Narrar el PDF":
+        // - Desaparece el botón superior
+        // - Se desactiva por completo el sonido de flip de páginas
+        // - Se abre el reproductor inferior y comienza la narración
         btnToggleNarracion.addEventListener('click', () => {
+            modoNarracionActivo = true;
+            sincronizarSonidoDFlip(false);
+
             btnToggleNarracion.classList.add('oculto');
             reproductor.classList.add('visible');
+
             audioNarracion.play().then(() => {
                 actualizarIconosPlay(true);
             }).catch(() => {
@@ -508,10 +533,17 @@
             });
         });
 
-        // Cerrar el reproductor inferior, pausar y volver a mostrar el botón superior
+        // Al tocar la "X" para cerrar el reproductor inferior:
+        // - Se pausa la narración
+        // - Se oculta el reproductor inferior y vuelve a aparecer el botón "Narrar el PDF"
+        // - Se reactiva el sonido de flip de pasar las páginas
         btnCerrarPlayer.addEventListener('click', () => {
             audioNarracion.pause();
             actualizarIconosPlay(false);
+
+            modoNarracionActivo = false;
+            sincronizarSonidoDFlip(true);
+
             reproductor.classList.remove('visible');
             btnToggleNarracion.classList.remove('oculto');
         });
@@ -527,7 +559,7 @@
             }
         });
 
-        // Sincronizar estado ante eventos nativos del reproductor de audio
+        // Sincronizar iconos ante eventos nativos del audio
         audioNarracion.addEventListener('play', () => actualizarIconosPlay(true));
         audioNarracion.addEventListener('pause', () => actualizarIconosPlay(false));
 
@@ -564,7 +596,7 @@
             tiempoActualEl.textContent = formatearTiempo(nuevoTiempo);
         });
 
-        // Al terminar el audio
+        // Al terminar el audio de la narración
         audioNarracion.addEventListener('ended', () => {
             actualizarIconosPlay(false);
             barraProgreso.value = 0;
