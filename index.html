@@ -16,6 +16,7 @@
             width: 100%;
             background-color: #121212; 
             overflow: hidden; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
         
         .contenedor-revista {
@@ -71,10 +72,9 @@
         }
 
         .icono-manita {
-            width: 75px; /* Puedes ajustar este tamaño según cómo se vea tu imagen webp */
+            width: 75px; 
             height: auto; 
             animation: latido 1.5s infinite ease-in-out; 
-            /* Esta sombra le dará un toque de luz por detrás a tu imagen, si tiene fondo transparente */
             filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.4));
         }
 
@@ -84,14 +84,300 @@
             100% { transform: scale(0.95); opacity: 0.7; }
         }
 
+        /* ==================================================
+           BOTÓN SUPERIOR Y REPRODUCTOR DE NARRACIÓN
+           ================================================== */
+
+        .btn-narrar-top {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9000;
+            background: rgba(25, 27, 38, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #f5f5f7;
+            padding: 10px 20px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            user-select: none;
+        }
+
+        .btn-narrar-top:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #00a3ff;
+            transform: translateX(-50%) translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 163, 255, 0.25);
+        }
+
+        .btn-narrar-top.activo {
+            background: rgba(0, 163, 255, 0.2);
+            border-color: #00a3ff;
+            color: #ffffff;
+        }
+
+        .btn-narrar-top svg {
+            width: 18px;
+            height: 18px;
+            color: #00a3ff;
+            flex-shrink: 0;
+        }
+
+        /* Barra del reproductor inferior */
+        .narration-player {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(150%);
+            z-index: 9000;
+            background: rgba(20, 22, 32, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 24px;
+            padding: 12px 22px;
+            width: 92%;
+            max-width: 540px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.65);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
+        }
+
+        .narration-player.visible {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Controles dentro de la barra */
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .ctrl-btn {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #f5f5f7;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 0;
+            position: relative;
+        }
+
+        .ctrl-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.35);
+            transform: scale(1.06);
+        }
+
+        .ctrl-btn:active {
+            transform: scale(0.95);
+        }
+
+        .ctrl-btn.play-main {
+            width: 44px;
+            height: 44px;
+            background: rgba(0, 163, 255, 0.2);
+            border-color: rgba(0, 163, 255, 0.45);
+        }
+
+        .ctrl-btn.play-main:hover {
+            background: rgba(0, 163, 255, 0.35);
+            border-color: #00a3ff;
+        }
+
+        .skip-label {
+            font-size: 0.55rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            margin-top: -2px;
+            color: #d1d1d6;
+        }
+
+        /* Barra de progreso y tiempos */
+        .narration-progress-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-grow: 1;
+            font-size: 0.78rem;
+            color: #98989d;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .narration-range {
+            flex-grow: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            outline: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .narration-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #f5f5f7;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
+            cursor: pointer;
+            transition: transform 0.15s ease, background 0.2s ease;
+        }
+
+        .narration-range::-webkit-slider-thumb:hover {
+            transform: scale(1.25);
+            background: #00a3ff;
+        }
+
+        .narration-range::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border: none;
+            border-radius: 50%;
+            background: #f5f5f7;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
+            cursor: pointer;
+            transition: transform 0.15s ease, background 0.2s ease;
+        }
+
+        .narration-range::-moz-range-thumb:hover {
+            transform: scale(1.25);
+            background: #00a3ff;
+        }
+
+        .close-player-btn {
+            background: transparent;
+            border: none;
+            color: #8e8e93;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .close-player-btn:hover {
+            color: #ffffff;
+        }
+
+        @media (max-width: 480px) {
+            .narration-player {
+                padding: 10px 14px;
+                gap: 10px;
+                bottom: 16px;
+            }
+            .ctrl-btn {
+                width: 34px;
+                height: 34px;
+            }
+            .ctrl-btn.play-main {
+                width: 40px;
+                height: 40px;
+            }
+            .narration-progress-box {
+                font-size: 0.72rem;
+                gap: 7px;
+            }
+        }
     </style>
 </head>
 <body>
 
     <!-- Animación flotante de la manita -->
     <div id="indicador-toque">
-        <!-- Aquí llamamos a tu imagen mano.webp -->
         <img src="mano.webp" alt="Tocar pantalla" class="icono-manita">
+    </div>
+
+    <!-- Botón superior para activar la narración con IA -->
+    <button id="btn-toggle-narracion" class="btn-narrar-top" title="Escuchar narración del documento">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" x2="12" y1="19" y2="22"></line>
+        </svg>
+        <span>Narrar el PDF</span>
+    </button>
+
+    <!-- Audio de la narración -->
+    <audio id="audio-narracion" src="020826.mp3" preload="metadata"></audio>
+
+    <!-- Reproductor inferior -->
+    <div id="reproductor-narracion" class="narration-player">
+        <div class="player-controls">
+            <!-- Retroceder 10 segundos -->
+            <button id="btn-rewind" class="ctrl-btn" title="Retroceder 10 segundos" aria-label="Retroceder 10 segundos">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                    <path d="M3 3v5h5"></path>
+                </svg>
+                <span class="skip-label">-10s</span>
+            </button>
+
+            <!-- Play / Pause -->
+            <button id="btn-play-pause" class="ctrl-btn play-main" title="Reproducir / Pausar" aria-label="Reproducir o Pausar">
+                <svg id="icon-play" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 6.82v10.36c0 .79.86 1.28 1.54.88l8.14-5.18c.62-.39.62-1.31 0-1.7l-8.14-5.18c-.68-.4-1.54.09-1.54.88z"/>
+                </svg>
+                <svg id="icon-pause" style="display: none;" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 20h4V4H6v16zm8-16v16h4V4h-4z"/>
+                </svg>
+            </button>
+
+            <!-- Adelantar 10 segundos -->
+            <button id="btn-forward" class="ctrl-btn" title="Adelantar 10 segundos" aria-label="Adelantar 10 segundos">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path>
+                    <path d="M21 3v5h-5"></path>
+                </svg>
+                <span class="skip-label">+10s</span>
+            </button>
+        </div>
+
+        <!-- Barra deslizable -->
+        <div class="narration-progress-box">
+            <span id="tiempo-actual">0:00</span>
+            <input type="range" id="barra-progreso" class="narration-range" value="0" min="0" max="100" step="0.1">
+            <span id="tiempo-total">0:00</span>
+        </div>
+
+        <!-- Cerrar reproductor -->
+        <button id="btn-cerrar-player" class="close-player-btn" title="Cerrar reproductor" aria-label="Cerrar reproductor">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
     </div>
 
     <div class="contenedor-revista">
@@ -119,34 +405,142 @@
         
         let usuarioYaToco = false;
 
-        // 1. Mostrar después de 2 segundos de cargar la página
         window.addEventListener('load', function() {
             setTimeout(function() {
-                // Si el usuario no ha tocado aún la pantalla, mostramos la manita
                 if (!usuarioYaToco) {
                     var indicador = document.getElementById('indicador-toque');
                     if (indicador) {
                         indicador.classList.add('visible');
                     }
                 }
-            }, 2000); // 2000 milisegundos = 2 segundos
+            }, 2000);
         });
 
-        // 2. Desaparecer al primer toque en cualquier parte
         document.addEventListener('pointerdown', function() {
-            usuarioYaToco = true; // Registramos que ya tocó
+            usuarioYaToco = true;
             var indicador = document.getElementById('indicador-toque');
             
             if (indicador) {
-                // Forzamos la opacidad a 0 para que se desvanezca
                 indicador.style.opacity = '0';
-                
-                // Lo eliminamos del DOM tras la transición
                 setTimeout(function() {
                     indicador.remove();
                 }, 800);
             }
-        }, { once: true }); // Se ejecuta una sola vez
+        }, { once: true });
+
+        // ==================================================
+        // LÓGICA DEL REPRODUCTOR DE NARRACIÓN (020826.mp3)
+        // ==================================================
+        const btnToggleNarracion = document.getElementById('btn-toggle-narracion');
+        const reproductor = document.getElementById('reproductor-narracion');
+        const audioNarracion = document.getElementById('audio-narracion');
+        const btnPlayPause = document.getElementById('btn-play-pause');
+        const iconPlay = document.getElementById('icon-play');
+        const iconPause = document.getElementById('icon-pause');
+        const btnRewind = document.getElementById('btn-rewind');
+        const btnForward = document.getElementById('btn-forward');
+        const barraProgreso = document.getElementById('barra-progreso');
+        const tiempoActualEl = document.getElementById('tiempo-actual');
+        const tiempoTotalEl = document.getElementById('tiempo-total');
+        const btnCerrarPlayer = document.getElementById('btn-cerrar-player');
+
+        function formatearTiempo(segundos) {
+            if (isNaN(segundos) || !isFinite(segundos)) return "0:00";
+            const min = Math.floor(segundos / 60);
+            const sec = Math.floor(segundos % 60);
+            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+        }
+
+        function actualizarIconosPlay(reproduciendo) {
+            if (reproduciendo) {
+                iconPlay.style.display = 'none';
+                iconPause.style.display = 'block';
+                btnToggleNarracion.classList.add('activo');
+            } else {
+                iconPlay.style.display = 'block';
+                iconPause.style.display = 'none';
+            }
+        }
+
+        // Mostrar/ocultar reproductor al pulsar el botón superior
+        btnToggleNarracion.addEventListener('click', () => {
+            const estaVisible = reproductor.classList.contains('visible');
+            if (!estaVisible) {
+                reproductor.classList.add('visible');
+                audioNarracion.play().then(() => {
+                    actualizarIconosPlay(true);
+                }).catch(() => {
+                    actualizarIconosPlay(false);
+                });
+            } else {
+                if (audioNarracion.paused) {
+                    audioNarracion.play();
+                    actualizarIconosPlay(true);
+                } else {
+                    audioNarracion.pause();
+                    actualizarIconosPlay(false);
+                }
+            }
+        });
+
+        // Cerrar el reproductor inferior y pausar
+        btnCerrarPlayer.addEventListener('click', () => {
+            audioNarracion.pause();
+            actualizarIconosPlay(false);
+            btnToggleNarracion.classList.remove('activo');
+            reproductor.classList.remove('visible');
+        });
+
+        // Play / Pause desde la barra inferior
+        btnPlayPause.addEventListener('click', () => {
+            if (audioNarracion.paused) {
+                audioNarracion.play();
+                actualizarIconosPlay(true);
+            } else {
+                audioNarracion.pause();
+                actualizarIconosPlay(false);
+            }
+        });
+
+        // Retroceder 10 segundos
+        btnRewind.addEventListener('click', () => {
+            audioNarracion.currentTime = Math.max(0, audioNarracion.currentTime - 10);
+        });
+
+        // Adelantar 10 segundos
+        btnForward.addEventListener('click', () => {
+            if (audioNarracion.duration) {
+                audioNarracion.currentTime = Math.min(audioNarracion.duration, audioNarracion.currentTime + 10);
+            }
+        });
+
+        // Actualizar metadatos de duración
+        audioNarracion.addEventListener('loadedmetadata', () => {
+            tiempoTotalEl.textContent = formatearTiempo(audioNarracion.duration);
+        });
+
+        // Actualizar progreso mientras se reproduce
+        audioNarracion.addEventListener('timeupdate', () => {
+            if (!audioNarracion.duration) return;
+            const porcentaje = (audioNarracion.currentTime / audioNarracion.duration) * 100;
+            barraProgreso.value = porcentaje;
+            tiempoActualEl.textContent = formatearTiempo(audioNarracion.currentTime);
+        });
+
+        // Arrastrar la barra para ubicar el lugar de la reproducción
+        barraProgreso.addEventListener('input', () => {
+            if (!audioNarracion.duration) return;
+            const nuevoTiempo = (barraProgreso.value / 100) * audioNarracion.duration;
+            audioNarracion.currentTime = nuevoTiempo;
+            tiempoActualEl.textContent = formatearTiempo(nuevoTiempo);
+        });
+
+        // Al terminar el audio
+        audioNarracion.addEventListener('ended', () => {
+            actualizarIconosPlay(false);
+            barraProgreso.value = 0;
+            tiempoActualEl.textContent = "0:00";
+        });
     </script>
 
 </body>
