@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Así te decidí amar</title>
+    <title>El mayor acto de amor</title>
     <style>
         /* Variables y Paleta de Colores Oscura */
         :root {
@@ -75,6 +75,21 @@
             transform: translateY(-2px) translateZ(0);
             -webkit-transform: translateY(-2px) translateZ(0);
             color: var(--accent-color);
+        }
+
+        /* Estilo específico para el botón de la carta en blanco */
+        .letter-btn {
+            background: #ffffff;
+            color: #0e1017;
+            border-color: #ffffff;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.25);
+        }
+
+        .letter-btn:hover {
+            background: #f0f0f5;
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            box-shadow: 0 6px 20px rgba(0, 163, 255, 0.35);
         }
 
         /* Contenedor principal estilo Glassmorphism */
@@ -258,7 +273,15 @@
 
     <div class="top-actions-container">
 
-        <!-- Botón 1: Fotos -->
+        <!-- Botón Carta (Blanco para resaltar) -->
+        <a href="https://davidjoser93.github.io/carta/" class="action-btn letter-btn" title="Ver Carta">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+        </a>
+
+        <!-- Botón Fotos -->
         <a href="https://davidjoser93.github.io/carta/fotos" class="action-btn" title="Ver Fotos">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -267,7 +290,7 @@
             </svg>
         </a>
 
-        <!-- Botón 2: Calendario -->
+        <!-- Botón Calendario -->
         <a href="https://davidjoser93.github.io/carta/2025" class="action-btn" title="Ver Calendario">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -277,8 +300,8 @@
             </svg>
         </a>
 
-        <!-- Botón 3: Descargar -->
-        <a id="download-btn" href="Así te decidí amar.mp3" download="Así te decidí amar.mp3" class="action-btn" title="Descargar MP3">
+        <!-- Botón Descargar -->
+        <a id="download-btn" href="El mayor acto de amor.mp3" download="El mayor acto de amor.mp3" class="action-btn" title="Descargar MP3">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                 <polyline points="7 10 12 15 17 10"></polyline>
@@ -289,11 +312,11 @@
     </div>
 
     <div class="player-card">
-        <img id="cover-image" src="Xocolate And More.jpg" alt="Portada" class="cover">
+        <img id="cover-image" src="Portada el mayor acto de amor.jpg" alt="Portada" class="cover">
         <video id="video-player" src="Aunque existan millones de rosas.mp4" class="cover hidden" playsinline preload="metadata"></video>
-        <audio id="audio-player" src="Así te decidí amar.mp3" preload="metadata"></audio>
+        <audio id="audio-player" src="El mayor acto de amor.mp3" preload="metadata"></audio>
         
-        <h2 class="title" id="song-title">Así te decidí amar</h2>
+        <h2 class="title" id="song-title">El mayor acto de amor</h2>
 
         <div class="progress-container">
             <span id="current-time">0:00</span>
@@ -327,6 +350,14 @@
 
     <script>
         const songs = [
+            {
+                title: "El mayor acto de amor",
+                titleHtml: "El mayor acto de amor",
+                type: "audio",
+                mediaSrc: "El mayor acto de amor.mp3",
+                coverSrc: "Portada el mayor acto de amor.jpg",
+                downloadSrc: "El mayor acto de amor.mp3"
+            },
             {
                 title: "Así te decidí amar",
                 titleHtml: "Así te decidí amar",
@@ -382,6 +413,7 @@
             pauseIcon.style.display = 'none';
             progressBar.value = 0;
             currentTimeEl.textContent = "0:00";
+            durationEl.textContent = "0:00";
 
             currentSongIndex = index;
             const song = songs[currentSongIndex];
@@ -395,17 +427,13 @@
                 coverImage.src = song.coverSrc;
                 coverImage.classList.remove('hidden');
                 video.classList.add('hidden');
-                if (isNaN(audio.duration)) {
-                    audio.load();
-                }
-                durationEl.textContent = formatTime(audio.duration);
+                audio.src = song.mediaSrc;
+                audio.load();
             } else {
                 coverImage.classList.add('hidden');
                 video.classList.remove('hidden');
-                if (isNaN(video.duration)) {
-                    video.load();
-                }
-                durationEl.textContent = formatTime(video.duration);
+                video.src = song.mediaSrc;
+                video.load();
             }
 
             prevBtn.disabled = (currentSongIndex === 0);
