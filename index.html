@@ -109,7 +109,7 @@
             letter-spacing: 0.3px;
             cursor: pointer;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45);
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), visibility 0.35s ease;
             user-select: none;
         }
 
@@ -120,10 +120,12 @@
             box-shadow: 0 10px 30px rgba(0, 163, 255, 0.25);
         }
 
-        .btn-narrar-top.activo {
-            background: rgba(0, 163, 255, 0.2);
-            border-color: #00a3ff;
-            color: #ffffff;
+        /* Oculta el botón una vez presionado */
+        .btn-narrar-top.oculto {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateX(-50%) translateY(-15px);
         }
 
         .btn-narrar-top svg {
@@ -451,44 +453,67 @@
             return `${min}:${sec < 10 ? '0' : ''}${sec}`;
         }
 
+        // Controlar el sonido de pasar página de dFlip
+        function configurarSonidoRevista(permitirSonido) {
+            // 1. Cambiar la opción en la instancia activa de dFlip (jQuery data o variable global)
+            if (window.jQuery) {
+                const libroEl = jQuery('#mi_revista');
+                if (libroEl.length && libroEl.data('dflip')) {
+                    libroEl.data('dflip').options.sound = permitirSonido;
+                }
+            }
+            if (window.df_mi_revista && window.df_mi_revista.options) {
+                window.df_mi_revista.options.sound = permitirSonido;
+            }
+            if (window.DFLIP && window.DFLIP.defaults) {
+                window.DFLIP.defaults.sound = permitirSonido;
+            }
+
+            // 2. Silenciar cualquier elemento <audio> adicional que dFlip cree para el efecto de página
+            document.querySelectorAll('audio').forEach(audioEl => {
+                if (audioEl !== audioNarracion) {
+                    audioEl.muted = !permitirSonido;
+                }
+            });
+        }
+
+        // Interceptar cualquier audio nuevo que dFlip intente reproducir mientras la narración está activa
+        document.addEventListener('play', function(e) {
+            if (e.target !== audioNarracion && !audioNarracion.paused) {
+                e.target.muted = true;
+                e.target.pause();
+            }
+        }, true);
+
         function actualizarIconosPlay(reproduciendo) {
             if (reproduciendo) {
                 iconPlay.style.display = 'none';
                 iconPause.style.display = 'block';
-                btnToggleNarracion.classList.add('activo');
+                configurarSonidoRevista(false); // Desactivar sonido de pasar página
             } else {
                 iconPlay.style.display = 'block';
                 iconPause.style.display = 'none';
+                configurarSonidoRevista(true); // Restaurar sonido de pasar página
             }
         }
 
-        // Mostrar/ocultar reproductor al pulsar el botón superior
+        // Al tocar "Narrar el PDF": ocultar el botón, mostrar el reproductor y reproducir
         btnToggleNarracion.addEventListener('click', () => {
-            const estaVisible = reproductor.classList.contains('visible');
-            if (!estaVisible) {
-                reproductor.classList.add('visible');
-                audioNarracion.play().then(() => {
-                    actualizarIconosPlay(true);
-                }).catch(() => {
-                    actualizarIconosPlay(false);
-                });
-            } else {
-                if (audioNarracion.paused) {
-                    audioNarracion.play();
-                    actualizarIconosPlay(true);
-                } else {
-                    audioNarracion.pause();
-                    actualizarIconosPlay(false);
-                }
-            }
+            btnToggleNarracion.classList.add('oculto');
+            reproductor.classList.add('visible');
+            audioNarracion.play().then(() => {
+                actualizarIconosPlay(true);
+            }).catch(() => {
+                actualizarIconosPlay(false);
+            });
         });
 
-        // Cerrar el reproductor inferior y pausar
+        // Cerrar el reproductor inferior, pausar y volver a mostrar el botón superior
         btnCerrarPlayer.addEventListener('click', () => {
             audioNarracion.pause();
             actualizarIconosPlay(false);
-            btnToggleNarracion.classList.remove('activo');
             reproductor.classList.remove('visible');
+            btnToggleNarracion.classList.remove('oculto');
         });
 
         // Play / Pause desde la barra inferior
@@ -501,6 +526,10 @@
                 actualizarIconosPlay(false);
             }
         });
+
+        // Sincronizar estado ante eventos nativos del reproductor de audio
+        audioNarracion.addEventListener('play', () => actualizarIconosPlay(true));
+        audioNarracion.addEventListener('pause', () => actualizarIconosPlay(false));
 
         // Retroceder 10 segundos
         btnRewind.addEventListener('click', () => {
