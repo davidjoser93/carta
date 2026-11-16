@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>No hay conexión</title>
+    <title>El mayor acto de amor</title>
     <style>
         /* Variables y Paleta de Colores Oscura */
         :root {
@@ -41,7 +41,7 @@
             top: 24px;
             right: 24px;
             display: flex;
-            gap: 12px; /* Separación entre los botones */
+            gap: 12px;
             z-index: 10;
         }
 
@@ -61,7 +61,6 @@
             transition: all 0.3s ease;
             cursor: pointer;
             
-            /* Corrección del parpadeo (Flicker Fix) */
             transform: translateZ(0);
             -webkit-transform: translateZ(0);
             backface-visibility: hidden;
@@ -262,7 +261,6 @@
             -webkit-transform: scale(0.98) translateZ(0);
         }
 
-        /* Estilo para los iconos internos */
         .play-pause-btn svg,
         .nav-btn svg {
             transition: transform 0.2s ease;
@@ -273,7 +271,7 @@
 
     <div class="top-actions-container">
 
-        <!-- Botón Carta (Blanco para resaltar) -->
+        <!-- Botón Carta -->
         <a href="https://davidjoser93.github.io/carta/" class="action-btn letter-btn" title="Ver Carta">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
@@ -301,7 +299,7 @@
         </a>
 
         <!-- Botón Descargar -->
-        <a id="download-btn" href="No hay conexión.mp3" download="No hay conexión.mp3" class="action-btn" title="Descargar MP3">
+        <a id="download-btn" href="El mayor acto de amor.mp3" download="El mayor acto de amor.mp3" class="action-btn" title="Descargar MP3">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                 <polyline points="7 10 12 15 17 10"></polyline>
@@ -312,11 +310,11 @@
     </div>
 
     <div class="player-card">
-        <img id="cover-image" src="No hay conexion.jpg" alt="Portada" class="cover">
+        <img id="cover-image" src="Portada el mayor acto de amor.jpg" alt="Portada" class="cover">
         <video id="video-player" src="Aunque existan millones de rosas.mp4" class="cover hidden" playsinline preload="metadata"></video>
-        <audio id="audio-player" src="No hay conexión.mp3" preload="metadata"></audio>
+        <audio id="audio-player" src="El mayor acto de amor.mp3" preload="metadata"></audio>
         
-        <h2 class="title" id="song-title">No hay conexión</h2>
+        <h2 class="title" id="song-title">El mayor acto de amor</h2>
 
         <div class="progress-container">
             <span id="current-time">0:00</span>
@@ -350,14 +348,6 @@
 
     <script>
         const songs = [
-            {
-                title: "No hay conexión",
-                titleHtml: "No hay conexión",
-                type: "audio",
-                mediaSrc: "No hay conexión.mp3",
-                coverSrc: "No hay conexion.jpg",
-                downloadSrc: "No hay conexión.mp3"
-            },
             {
                 title: "El mayor acto de amor",
                 titleHtml: "El mayor acto de amor",
@@ -517,11 +507,9 @@
             media.addEventListener('ended', () => {
                 if (getActiveMedia() !== media) return;
                 
-                // Si hay una siguiente canción, la carga y la reproduce automáticamente
                 if (currentSongIndex < songs.length - 1) {
                     loadSong(currentSongIndex + 1, true);
                 } else {
-                    // Si es la última canción de la lista, detiene y reinicia los controles
                     playIcon.style.display = 'block';
                     pauseIcon.style.display = 'none';
                     progressBar.value = 0;
